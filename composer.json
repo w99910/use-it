@@ -1,6 +1,13 @@
 {
     "name": "thomas-brillion/use-it",
-    "description": "Handling Features and Their Usages",
+    "description": "Easy to use Laravel Features, Abilities, Usages and Consumptions",
+    "keywords": [
+        "Laravel",
+        "Features",
+        "Abilities",
+        "Usages",
+        "Consumptions"
+    ],
     "type": "library",
     "license": "MIT",
     "scripts": {
