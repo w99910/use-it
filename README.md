@@ -1,4 +1,4 @@
-Features, Usages and Consumptions
+# Use-It - Features, Abilities, Usages and Consumptions
 
 Feature can be either quantity type or ability type.
 
