@@ -1,0 +1,41 @@
+{
+    "name": "thomas-brillion/use-it",
+    "description": "Handling Features and Their Usages",
+    "type": "library",
+    "license": "MIT",
+    "scripts": {
+        "test": "./vendor/bin/pest"
+    },
+    "autoload": {
+        "psr-4": {
+            "ThomasBrillion\\UseIt\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Thomas Brillion",
+            "email": "thomasbrillionn@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/database": "^11.6",
+        "illuminate/support": "^11.6"
+    },
+    "require-dev": {
+        "pestphp/pest": "^2.34",
+        "illuminate/testing": "^11.6"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ThomasBrillion\\UseIt\\UseItServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
