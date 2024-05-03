@@ -6,7 +6,6 @@ use ThomasBrillion\UseIt\Traits\CanUseIt;
 
 class User extends Model implements CanUseFeature
 {
-    protected $table = 'use_it_users';
-    
     use CanUseIt;
+    protected $table = 'use_it_users';
 }

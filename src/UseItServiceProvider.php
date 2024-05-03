@@ -5,7 +5,7 @@ namespace ThomasBrillion\UseIt;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider;
 
-class UseItServiceProvider extends  ServiceProvider
+class UseItServiceProvider extends ServiceProvider
 {
     /**
      * @throws BindingResolutionException

@@ -11,7 +11,7 @@ enum FeatureType: string
     {
         return [
             FeatureType::Ability->value,
-            FeatureType::Quantity->value
+            FeatureType::Quantity->value,
         ];
     }
 }

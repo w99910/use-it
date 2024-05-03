@@ -30,6 +30,7 @@ class UsageService
         if ($feature->type !== FeatureType::Quantity) {
             throw new Exception('Feature should be quantity type', 401);
         }
+
         return $this->creator->usages()->create([
             'feature_id' => $feature->id,
             'name' => $feature->name,
@@ -51,9 +52,10 @@ class UsageService
         if ($feature->type !== FeatureType::Quantity) {
             throw new Exception('Feature must be quantity type');
         }
+
         return $this->creator->usages()
             ->where('feature_id', $feature->id)
-            ->where('expire_at', '>', new DateTime)
+            ->where('expire_at', '>', new DateTime())
             ->whereColumn('total', '>', 'spend')
             ->orderByDesc('level')
             ->get();

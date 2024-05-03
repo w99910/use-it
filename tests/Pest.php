@@ -8,11 +8,11 @@ use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 
 $databasePath = __DIR__.'/../database.sqlite';
 
-if (!file_exists($databasePath)) {
+if (! file_exists($databasePath)) {
     exec("touch $databasePath");
 }
 
-$capsule = new Capsule;
+$capsule = new Capsule();
 $capsule->addConnection([
     'driver' => 'sqlite',
     'database' => $databasePath,
@@ -98,5 +98,3 @@ $schema->create('use_it_consumptions', function (Blueprint $table) {
     $table->foreign('usage_id')->references('id')->on('use_it_usages');
     $table->index(['consumer_id', 'consumer_type']);
 });
-
-

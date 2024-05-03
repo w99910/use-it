@@ -6,7 +6,6 @@ use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int|string $id
@@ -22,7 +21,7 @@ class Ability extends Model
 
     protected $casts = [
         'expire_at' => 'datetime',
-        'meta' => 'json'
+        'meta' => 'json',
     ];
 
     public function creator(): MorphTo

@@ -26,7 +26,7 @@ class Usage extends Model
 
     protected $casts = [
         'expire_at' => 'datetime',
-        'meta' => 'json'
+        'meta' => 'json',
     ];
 
     public function consumptions(): HasMany

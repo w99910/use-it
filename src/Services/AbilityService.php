@@ -29,6 +29,7 @@ class AbilityService
         if ($feature->type !== FeatureType::Ability) {
             throw new Exception('Feature should be ability type', 401);
         }
+
         return $this->creator->abilities()->create([
             'name' => $feature->name,
             'feature_id' => $feature->id,
@@ -41,6 +42,6 @@ class AbilityService
     {
         return $this->creator->abilities()
             ->where('feature_id', $feature->id)
-            ->where('expire_at', '>', new DateTime)->exists();
+            ->where('expire_at', '>', new DateTime())->exists();
     }
 }

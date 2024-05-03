@@ -23,12 +23,12 @@ class Feature extends Model
         'type', // ability or quantity
         'quantity',
         'meta',
-        'disabled'
+        'disabled',
     ];
 
     protected $casts = [
         'type' => FeatureType::class,
-        'meta' => 'json'
+        'meta' => 'json',
     ];
 
     public function usages(): HasMany

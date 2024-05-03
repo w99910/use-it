@@ -49,7 +49,7 @@ class ConsumptionService
     public function canConsume(Usage $usage, int $amount): bool
     {
         // if usage is expired or exceed amount when it is consumed
-        if (new DateTime > $usage->expire_at) {
+        if (new DateTime() > $usage->expire_at) {
             throw new Exception('Usage is expired', 401);
         }
 
