@@ -31,7 +31,8 @@
     },
     "require-dev": {
         "pestphp/pest": "^2.34",
-        "illuminate/testing": "^11.6"
+        "illuminate/testing": "^11.6",
+        "friendsofphp/php-cs-fixer": "^3.54"
     },
     "extra": {
         "laravel": {
