@@ -2,8 +2,10 @@
 
 namespace ThomasBrillion\UseIt\Services;
 
+use Carbon\Carbon;
 use DateTime;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use ThomasBrillion\UseIt\Interfaces\CanConsumeUsage;
 use ThomasBrillion\UseIt\Models\Consumption;
@@ -56,5 +58,21 @@ class ConsumptionService
         }
 
         return true;
+    }
+
+    public function getConsumptionsOfUsage(Usage $usage): Collection
+    {
+        return $this->consumer->consumptions()->where('usage_id', $usage->id)->get();
+    }
+
+    public function getConsumptionsOfUsageBetween(
+        Usage $usage,
+        DateTime|Carbon $startTime,
+        DateTime|Carbon $endTime
+    ): Collection {
+        return $this->consumer->consumptions()
+            ->where('usage_id', $usage->id)
+            ->whereBetween('created_at', [$startTime, $endTime])
+            ->get();
     }
 }

@@ -4,7 +4,9 @@ use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Consumption;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Models\Usage;
+use ThomasBrillion\UseIt\Services\ConsumptionService;
 use ThomasBrillion\UseIt\Services\FeatureService;
+use ThomasBrillion\UseIt\Services\UsageService;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 
 require_once __DIR__.'/User.php';
@@ -58,6 +60,14 @@ it('can create quantity feature and consume it', function () {
 
     expect($response)->toBeInstanceOf(Usage::class)
         ->and($featureService->try($feature, 10))->toBeInstanceOf(Consumption::class);
+});
+
+it('can get consumptions of usage', function () {
+    $user = User::first();
+    $usage = Usage::first();
+
+    $consumptionService = new ConsumptionService($user);
+    expect($consumptionService->getConsumptionsOfUsage($usage))->not->toBeEmpty();
 });
 
 it('can revoke feature', function () {
