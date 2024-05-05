@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
 use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Consumption;
 use ThomasBrillion\UseIt\Models\Feature;
@@ -7,6 +10,7 @@ use ThomasBrillion\UseIt\Models\Usage;
 use ThomasBrillion\UseIt\Services\ConsumptionService;
 use ThomasBrillion\UseIt\Services\FeatureService;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
+use ThomasBrillion\UseIt\Support\ModelResolver;
 
 require_once __DIR__.'/User.php';
 
@@ -90,4 +94,25 @@ it('can revoke feature', function () {
     } catch (Exception $exception) {
         expect($exception->getMessage())->toBe('Cannot find usages for the feature');
     }
+});
+
+
+it('can register new feature model', function () {
+    $customFeature = new class extends Model implements FeatureInterface {
+        protected $table = 'use_it_custom_features';
+
+        public function usages(): HasMany
+        {
+            return $this->hasMany(Usage::class);
+        }
+
+        public function abilities(): HasMany
+        {
+            return $this->hasMany(Ability::class);
+        }
+    };
+
+    ModelResolver::registerModel('feature', get_class($customFeature));
+
+    expect(ModelResolver::getFeatureModel())->toBe(get_class($customFeature));
 });

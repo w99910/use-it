@@ -8,7 +8,7 @@ use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 
 $databasePath = __DIR__.'/../database.sqlite';
 
-if (! file_exists($databasePath)) {
+if (!file_exists($databasePath)) {
     exec("touch $databasePath");
 }
 
