@@ -4,6 +4,7 @@ namespace ThomasBrillion\UseIt;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider;
+use ThomasBrillion\UseIt\Http\Middlewares\CanUseFeatureMiddleware;
 
 class UseItServiceProvider extends ServiceProvider
 {
@@ -23,5 +24,11 @@ class UseItServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/use-it.php' => $this->app->configPath('use-it.php'),
         ], 'use-it');
+
+        // Register middleware
+        $router = $this->app->make('router');
+        if ($router && method_exists($router, 'aliasMiddleware')) {
+            $router->aliasMiddleware('can-use-feature', CanUseFeatureMiddleware::class);
+        }
     }
 }

@@ -51,14 +51,41 @@ trait CanUseIt
     }
 
     /**
-     * @param  Feature  $feature
+     * @param  string|Feature  $feature
      * @param  int  $amount
      * @param  array  $meta
-     * @return false|Model
+     * @return Model|bool
      * @throws Exception
      */
-    public function try(Feature $feature, int $amount, array $meta = []): Model|bool
+    public function try(string|Feature $feature, int $amount, array $meta = []): Model|bool
     {
-        return (new FeatureService($this))->try($feature, $amount, $meta);
+        $featureService = new FeatureService($this);
+        if (is_string($feature)) {
+            $feature = $featureService->findFeature($feature);
+
+            if (!$feature) {
+                return false;
+            }
+        }
+        return $featureService->try($feature, $amount, $meta);
+    }
+
+    /**
+     * @param  string|Feature  $feature
+     * @param  int  $amount
+     * @return bool
+     * @throws Exception
+     */
+    public function canUseFeature(string|Feature $feature, int $amount): bool
+    {
+        $featureService = new FeatureService($this);
+        if (is_string($feature)) {
+            $feature = $featureService->findFeature($feature);
+
+            if (!$feature) {
+                return false;
+            }
+        }
+        return $featureService->try($feature, $amount, [], true);
     }
 }

@@ -20,6 +20,8 @@ You want to create usage
 
 Feature can be either quantity type or ability type.
 
+Feature name must be unique.
+
 When feature has been granted to a model ( user or team or someone else ), lets called creator, usage will be generated
 for the creator.
 This scenario is aimed for such situation that there is a team and when a team is subscribed to the feature, all team
@@ -31,7 +33,27 @@ When usage has the same feature id and creator id, higher level usage will be co
 
 ## Usage
 
-- ### Feature
+- ### Services
+- ### Middleware
+
+In Laravel, `ThomasBrillion\UseIt\Http\Middlewares\CanUseFeatureMiddleware` is automatically registered in service
+provider. You can use it in your route by using middleware alias `can-use-feature` such as
+
+```php
+Route::post('/post',[ExampleAction::class,'post'])->middleware('can-use-feature:post');
+```
+
+You can provide your auth guard as second parameter.
+
+```php
+Route::post('/post',[ExampleAction::class,'post'])->middleware('can-use-feature:post,student');
+```
+
+To check if user can consume usage of feature, you need to pass `amount` input in the request.
+
+```text
+https://example-laravel.test/post?amount=12
+```
 
 - ### Using Custom Models
 

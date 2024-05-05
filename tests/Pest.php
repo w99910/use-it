@@ -39,7 +39,7 @@ $schema->create('use_it_users', function (Blueprint $table) {
 $schema->dropIfExists('use_it_features');
 $schema->create('use_it_features', function (Blueprint $table) {
     $table->id();
-    $table->string('name', length: 256);
+    $table->string('name', length: 256)->unique();
     $table->string('description', length: 256);
     $table->enum('type', FeatureType::values());
     $table->bigInteger('quantity')->nullable();

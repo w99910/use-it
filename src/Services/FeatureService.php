@@ -58,6 +58,11 @@ class FeatureService
         ]);
     }
 
+    public function findFeature(string $featureName): Model|null
+    {
+        return $this->featureQuery->firstWhere('name', $featureName);
+    }
+
     /**
      * @param  Feature  $feature
      * @param  DateTime  $expireAt
@@ -80,14 +85,15 @@ class FeatureService
      * @param  Feature  $feature
      * @param  int|null  $amount
      * @param  array  $meta
+     * @param  bool  $dryTest
      * @return Model|bool
      * @throws Exception
      */
-    public function try(Feature $feature, int $amount = null, array $meta = []): Model|bool
+    public function try(Feature $feature, int $amount = null, array $meta = [], bool $dryTest = false): Model|bool
     {
         return match ($feature->type) {
             FeatureType::Ability => (new AbilityService($this->creator))->try($feature),
-            FeatureType::Quantity => (new UsageService($this->creator))->try($feature, $amount, $meta)
+            FeatureType::Quantity => (new UsageService($this->creator))->try($feature, $amount, $meta, $dryTest)
         };
     }
 

@@ -68,7 +68,7 @@ class UsageService
      * @return false|Consumption
      * @throws Exception
      */
-    public function try(Feature $feature, int $amount, array $meta = []): bool|Consumption
+    public function try(Feature $feature, int $amount, array $meta = [], bool $dryTest = false): bool|Consumption
     {
         $usages = $this->getConsumableUsages($feature);
 
@@ -80,6 +80,9 @@ class UsageService
 
         foreach ($usages as $usage) {
             try {
+                if ($dryTest) {
+                    return $consumptionService->canConsume($usage, $amount);
+                }
                 return $consumptionService->create($usage, $amount, $meta);
             } catch (Exception $exception) {
                 continue;
