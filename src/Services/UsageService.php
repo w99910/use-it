@@ -6,7 +6,7 @@ use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use ThomasBrillion\UseIt\Interfaces\CanCreateUsage;
+use ThomasBrillion\UseIt\Interfaces\Actions\CanCreateUsage;
 use ThomasBrillion\UseIt\Models\Consumption;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Models\Usage;

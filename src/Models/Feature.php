@@ -4,6 +4,7 @@ namespace ThomasBrillion\UseIt\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 
 /**
@@ -13,7 +14,7 @@ use ThomasBrillion\UseIt\Support\Enums\FeatureType;
  * @property FeatureType $type
  * @property int|null $quantity
  */
-class Feature extends Model
+class Feature extends Model implements FeatureInterface
 {
     protected $table = 'use_it_features';
 

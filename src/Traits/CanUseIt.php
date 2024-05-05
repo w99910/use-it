@@ -5,11 +5,9 @@ namespace ThomasBrillion\UseIt\Traits;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use ThomasBrillion\UseIt\Models\Ability;
-use ThomasBrillion\UseIt\Models\Consumption;
 use ThomasBrillion\UseIt\Models\Feature;
-use ThomasBrillion\UseIt\Models\Usage;
 use ThomasBrillion\UseIt\Services\FeatureService;
+use ThomasBrillion\UseIt\Support\ModelResolver;
 
 trait CanUseIt
 {
@@ -19,11 +17,11 @@ trait CanUseIt
      */
     public function abilities(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
-        return $this->morphMany(Ability::class, 'creator');
+        return $this->morphMany(ModelResolver::getAbilityModel(), 'creator');
     }
 
     /**
@@ -32,11 +30,11 @@ trait CanUseIt
      */
     public function usages(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
-        return $this->morphMany(Usage::class, 'creator');
+        return $this->morphMany(ModelResolver::getUsageModel(), 'creator');
     }
 
     /**
@@ -45,11 +43,11 @@ trait CanUseIt
      */
     public function consumptions(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
-        return $this->morphMany(Consumption::class, 'consumer');
+        return $this->morphMany(ModelResolver::getConsumptionModel(), 'consumer');
     }
 
     /**

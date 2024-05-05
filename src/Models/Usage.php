@@ -6,6 +6,7 @@ use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
 
 // get top usages
 // get usage for days
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $total
  * @property int $spend
  */
-class Usage extends Model
+class Usage extends Model implements UsageInterface
 {
     protected $table = 'use_it_usages';
 

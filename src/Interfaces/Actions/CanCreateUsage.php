@@ -1,6 +1,6 @@
 <?php
 
-namespace ThomasBrillion\UseIt\Interfaces;
+namespace ThomasBrillion\UseIt\Interfaces\Actions;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 

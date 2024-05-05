@@ -16,12 +16,6 @@ class UseItServiceProvider extends ServiceProvider
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         }
 
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-
-            ]);
-        }
-
         $this->publishesMigrations([
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ]);

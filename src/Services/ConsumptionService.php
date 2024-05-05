@@ -7,7 +7,7 @@ use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use ThomasBrillion\UseIt\Interfaces\CanConsumeUsage;
+use ThomasBrillion\UseIt\Interfaces\Actions\CanConsumeUsage;
 use ThomasBrillion\UseIt\Models\Consumption;
 use ThomasBrillion\UseIt\Models\Usage;
 

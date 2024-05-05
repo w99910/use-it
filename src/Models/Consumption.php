@@ -5,8 +5,9 @@ namespace ThomasBrillion\UseIt\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface;
 
-class Consumption extends Model
+class Consumption extends Model implements ConsumptionInterface
 {
     protected $table = 'use_it_consumptions';
 

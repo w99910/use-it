@@ -4,12 +4,14 @@ namespace ThomasBrillion\UseIt\Services;
 
 use DateTime;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use ThomasBrillion\UseIt\Interfaces\CanUseFeature;
+use ThomasBrillion\UseIt\Interfaces\Actions\CanUseFeature;
 use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Models\Usage;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
+use ThomasBrillion\UseIt\Support\ModelResolver;
 
 // TO-DO: implement methods
 
@@ -17,9 +19,11 @@ use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 
 class FeatureService
 {
+    protected Builder $featureQuery;
+
     public function __construct(protected CanUseFeature $creator)
     {
-
+        $this->featureQuery = (new (ModelResolver::getFeatureModel()))->query();
     }
 
     /**
@@ -29,7 +33,7 @@ class FeatureService
      * @param  int|null  $quantity
      * @param  array  $meta
      * @param  bool  $disabled
-     * @return Feature
+     * @return Model|Feature
      * @throws Exception
      */
     public function create(
@@ -39,12 +43,12 @@ class FeatureService
         int $quantity = null,
         array $meta = [],
         bool $disabled = false
-    ): Feature {
-        if ($type === FeatureType::Quantity && ! $quantity) {
+    ): Model|Feature {
+        if ($type === FeatureType::Quantity && !$quantity) {
             throw new Exception('Please provide quantity for quantity-typed feature', 401);
         }
 
-        return Feature::create([
+        return $this->featureQuery->create([
             'name' => $name,
             'description' => $description,
             'type' => $type,

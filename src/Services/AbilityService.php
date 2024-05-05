@@ -5,7 +5,7 @@ namespace ThomasBrillion\UseIt\Services;
 use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use ThomasBrillion\UseIt\Interfaces\CanCreateAbility;
+use ThomasBrillion\UseIt\Interfaces\Actions\CanCreateAbility;
 use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;

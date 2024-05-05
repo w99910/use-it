@@ -6,12 +6,13 @@ use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface;
 
 /**
  * @property int|string $id
  * @property DateTime $expire_at
  */
-class Ability extends Model
+class Ability extends Model implements AbilityInterface
 {
     protected $table = 'use_it_abilities';
 
