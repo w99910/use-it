@@ -98,7 +98,7 @@ it('can revoke feature', function () {
 
 
 it('can register new feature model', function () {
-    $customFeature = new class extends Model implements FeatureInterface {
+    $customFeature = new class () extends Model implements FeatureInterface {
         protected $table = 'use_it_custom_features';
 
         public function usages(): HasMany

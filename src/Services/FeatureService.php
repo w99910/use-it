@@ -44,7 +44,7 @@ class FeatureService
         array $meta = [],
         bool $disabled = false
     ): Model|Feature {
-        if ($type === FeatureType::Quantity && !$quantity) {
+        if ($type === FeatureType::Quantity && ! $quantity) {
             throw new Exception('Please provide quantity for quantity-typed feature', 401);
         }
 

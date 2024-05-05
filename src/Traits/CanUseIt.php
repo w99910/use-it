@@ -17,7 +17,7 @@ trait CanUseIt
      */
     public function abilities(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -30,7 +30,7 @@ trait CanUseIt
      */
     public function usages(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -43,7 +43,7 @@ trait CanUseIt
      */
     public function consumptions(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
