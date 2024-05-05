@@ -83,6 +83,7 @@ class UsageService
                 if ($dryTest) {
                     return $consumptionService->canConsume($usage, $amount);
                 }
+
                 return $consumptionService->create($usage, $amount, $meta);
             } catch (Exception $exception) {
                 continue;

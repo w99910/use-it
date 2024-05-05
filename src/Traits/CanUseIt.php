@@ -63,10 +63,11 @@ trait CanUseIt
         if (is_string($feature)) {
             $feature = $featureService->findFeature($feature);
 
-            if (!$feature) {
+            if (! $feature) {
                 return false;
             }
         }
+
         return $featureService->try($feature, $amount, $meta);
     }
 
@@ -82,10 +83,11 @@ trait CanUseIt
         if (is_string($feature)) {
             $feature = $featureService->findFeature($feature);
 
-            if (!$feature) {
+            if (! $feature) {
                 return false;
             }
         }
+
         return $featureService->try($feature, $amount, [], true);
     }
 }
