@@ -150,8 +150,9 @@ it('can register new feature model', function () {
 
         public function toggleDisability(): bool
         {
-            $this->disabled = !$this->disabled;
+            $this->disabled = ! $this->disabled;
             $this->save();
+
             return $this->disabled;
         }
     };

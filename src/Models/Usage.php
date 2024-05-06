@@ -80,6 +80,7 @@ class Usage extends Model implements UsageInterface
     {
         $this->spend = $updatedAmount;
         $this->save();
+
         return $this;
     }
 }

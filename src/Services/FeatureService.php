@@ -65,10 +65,11 @@ class FeatureService
     {
         if (is_string($feature)) {
             $feature = $this->findFeature($feature);
-            if (!$feature) {
+            if (! $feature) {
                 throw new Exception('Feature not found', 404);
             }
         }
+
         return $feature;
     }
 
@@ -89,10 +90,16 @@ class FeatureService
         array $meta = []
     ): Ability|Usage {
         $feature = $this->resolveFeature($feature);
+
         return match ($feature->getType()) {
             FeatureType::Ability => (new AbilityService($this->creator))->create($feature, $expireAt, $meta),
-            FeatureType::Quantity => (new UsageService($this->creator))->create($feature, $expireAt, $total, $level,
-                $meta),
+            FeatureType::Quantity => (new UsageService($this->creator))->create(
+                $feature,
+                $expireAt,
+                $total,
+                $level,
+                $meta
+            ),
         };
     }
 
@@ -128,13 +135,14 @@ class FeatureService
     public function disableFeature(FeatureInterface|string $feature): bool
     {
         $feature = $this->resolveFeature($feature);
-        if (!$feature->isDisabled()) {
+        if (! $feature->isDisabled()) {
             $feature->toggleDisability();
+
             return true;
         }
+
         return false;
     }
-
 
     /**
      * @param  FeatureInterface|string  $feature
@@ -146,8 +154,10 @@ class FeatureService
         $feature = $this->resolveFeature($feature);
         if ($feature->isDisabled()) {
             $feature->toggleDisability();
+
             return true;
         }
+
         return false;
     }
 
@@ -167,6 +177,7 @@ class FeatureService
         if ($feature->isDisabled()) {
             return false;
         }
+
         return match ($feature->getType()) {
             FeatureType::Ability => (new AbilityService($this->creator))->try($feature),
             FeatureType::Quantity => (new UsageService($this->creator))->try($feature, $amount, $meta)

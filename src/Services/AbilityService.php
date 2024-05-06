@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use ThomasBrillion\UseIt\Interfaces\Actions\CanCreateAbility;
 use ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
-use ThomasBrillion\UseIt\Models\Ability;
-use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 
 class AbilityService

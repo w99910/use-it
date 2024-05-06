@@ -66,8 +66,9 @@ class Feature extends Model implements FeatureInterface
 
     public function toggleDisability(): bool
     {
-        $this->disabled = !$this->disabled;
+        $this->disabled = ! $this->disabled;
         $this->save();
+
         return $this->disabled;
     }
 }
