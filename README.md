@@ -2,14 +2,17 @@
 
 ## Table Of Contents
 
-- Introduction
-- Concept
-- Installation
-- Usage
-- Testing
-- Bug Report
-- License
-- Funding
+- [Introduction](#introduction)
+- [Concept](#concept)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Middleware](#middleware)
+- [SoftDeletes](#softdeletes)
+- [Custom Models](#using-custom-models)
+- [Testing](#testing)
+- [Bug Report](#bug-report)
+- [License](#license)
+- [Funding](#funding)
 
 ## Introduction
 
@@ -41,6 +44,8 @@ usage by using the feature name.
 ```php
 composer require thomas-brillion/use-it
 ```
+
+## Usage
 
 - ### Setting up your model
 
