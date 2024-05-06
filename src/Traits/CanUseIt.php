@@ -59,20 +59,7 @@ trait CanUseIt
      */
     public function try(string|Feature $feature, int $amount, array $meta = []): Model|bool
     {
-<<<<<<< HEAD
-        $featureService = new FeatureService($this);
-        if (is_string($feature)) {
-            $feature = $featureService->findFeature($feature);
-
-            if (! $feature) {
-                return false;
-            }
-        }
-
-        return $featureService->try($feature, $amount, $meta);
-=======
         return (new FeatureService($this))->try($feature, $amount, $meta);
->>>>>>> a70030f (commit)
     }
 
     /**
@@ -83,19 +70,6 @@ trait CanUseIt
      */
     public function canUseFeature(string|Feature $feature, int $amount = null): bool
     {
-<<<<<<< HEAD
-        $featureService = new FeatureService($this);
-        if (is_string($feature)) {
-            $feature = $featureService->findFeature($feature);
-
-            if (! $feature) {
-                return false;
-            }
-        }
-
-        return $featureService->try($feature, $amount, [], true);
-=======
         return (new FeatureService($this))->canUse($feature, $amount);
->>>>>>> a70030f (commit)
     }
 }
