@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface;
+use ThomasBrillion\UseIt\Support\ModelResolver;
 
 class Consumption extends Model implements ConsumptionInterface
 {
@@ -20,7 +21,7 @@ class Consumption extends Model implements ConsumptionInterface
 
     public function usage(): BelongsTo
     {
-        return $this->belongsTo(Usage::class);
+        return $this->belongsTo(ModelResolver::getUsageModel());
     }
 
     public function consumer(): MorphTo

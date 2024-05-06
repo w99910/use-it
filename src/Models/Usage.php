@@ -6,15 +6,16 @@ use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
-
-// get top usages
-// get usage for days
+use ThomasBrillion\UseIt\Support\ModelResolver;
 
 /**
  * @property int|string $id
+ * @property int|string $name
  * @property DateTime $expire_at
  * @property int $total
+ * @property int $level
  * @property int $spend
  */
 class Usage extends Model implements UsageInterface
@@ -32,16 +33,53 @@ class Usage extends Model implements UsageInterface
 
     public function consumptions(): HasMany
     {
-        return $this->hasMany(Consumption::class);
+        return $this->hasMany(ModelResolver::getConsumptionModel());
     }
 
-    public function creator(): \Illuminate\Database\Eloquent\Relations\MorphTo
+    public function creator(): MorphTo
     {
         return $this->morphTo();
     }
 
     public function feature(): BelongsTo
     {
-        return $this->belongsTo(Feature::class);
+        return $this->belongsTo(ModelResolver::getFeatureModel());
+    }
+
+    public function getId(): string|int
+    {
+        return $this->id;
+    }
+
+    public function getName(): string|int
+    {
+        return $this->name;
+    }
+
+    public function getSpend(): int
+    {
+        return $this->spend;
+    }
+
+    public function getTotal(): int
+    {
+        return $this->total;
+    }
+
+    public function getLevel(): int
+    {
+        return $this->level;
+    }
+
+    public function getExpiredAt(): DateTime
+    {
+        return $this->expire_at;
+    }
+
+    public function consume(int $updatedAmount): static
+    {
+        $this->spend = $updatedAmount;
+        $this->save();
+        return $this;
     }
 }

@@ -16,7 +16,6 @@ return new class extends Migration {
             $table->string('name', length: 256)->unique();
             $table->string('description', length: 256);
             $table->enum('type', FeatureType::values());
-            $table->bigInteger('quantity')->nullable();
             $table->json('meta')->nullable();
             $table->boolean('disabled')->default(false);
             $table->timestamps();

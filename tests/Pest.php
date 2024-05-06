@@ -8,7 +8,7 @@ use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 
 $databasePath = __DIR__.'/../database.sqlite';
 
-if (! file_exists($databasePath)) {
+if (!file_exists($databasePath)) {
     exec("touch $databasePath");
 }
 
@@ -42,7 +42,6 @@ $schema->create('use_it_features', function (Blueprint $table) {
     $table->string('name', length: 256)->unique();
     $table->string('description', length: 256);
     $table->enum('type', FeatureType::values());
-    $table->bigInteger('quantity')->nullable();
     $table->json('meta')->nullable();
     $table->boolean('disabled')->default(false);
     $table->timestamps();

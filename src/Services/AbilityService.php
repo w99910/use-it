@@ -6,6 +6,8 @@ use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use ThomasBrillion\UseIt\Interfaces\Actions\CanCreateAbility;
+use ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface;
+use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
 use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
@@ -18,30 +20,30 @@ class AbilityService
     }
 
     /**
-     * @param  Feature  $feature
+     * @param  FeatureInterface  $feature
      * @param  DateTime  $expire_at
      * @param  array  $meta
-     * @return Model|Ability
+     * @return Model|AbilityInterface
      * @throws Exception
      */
-    public function create(Feature $feature, DateTime $expire_at, array $meta = []): Model|Ability
+    public function create(FeatureInterface $feature, DateTime $expire_at, array $meta = []): Model|AbilityInterface
     {
-        if ($feature->type !== FeatureType::Ability) {
+        if ($feature->getType() !== FeatureType::Ability) {
             throw new Exception('Feature should be ability type', 401);
         }
 
         return $this->creator->abilities()->create([
-            'name' => $feature->name,
-            'feature_id' => $feature->id,
+            'name' => $feature->getName(),
+            'feature_id' => $feature->getId(),
             'expire_at' => $expire_at,
             'meta' => $meta,
         ]);
     }
 
-    public function try(Feature $feature): bool
+    public function try(FeatureInterface $feature): bool
     {
         return $this->creator->abilities()
-            ->where('feature_id', $feature->id)
+            ->where('feature_id', $feature->getId())
             ->where('expire_at', '>', new DateTime())->exists();
     }
 }

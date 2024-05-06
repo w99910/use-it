@@ -17,7 +17,7 @@ trait CanUseIt
      */
     public function abilities(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -30,7 +30,7 @@ trait CanUseIt
      */
     public function usages(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -43,7 +43,7 @@ trait CanUseIt
      */
     public function consumptions(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -59,6 +59,7 @@ trait CanUseIt
      */
     public function try(string|Feature $feature, int $amount, array $meta = []): Model|bool
     {
+<<<<<<< HEAD
         $featureService = new FeatureService($this);
         if (is_string($feature)) {
             $feature = $featureService->findFeature($feature);
@@ -69,16 +70,20 @@ trait CanUseIt
         }
 
         return $featureService->try($feature, $amount, $meta);
+=======
+        return (new FeatureService($this))->try($feature, $amount, $meta);
+>>>>>>> a70030f (commit)
     }
 
     /**
      * @param  string|Feature  $feature
-     * @param  int  $amount
+     * @param  int|null  $amount
      * @return bool
      * @throws Exception
      */
-    public function canUseFeature(string|Feature $feature, int $amount): bool
+    public function canUseFeature(string|Feature $feature, int $amount = null): bool
     {
+<<<<<<< HEAD
         $featureService = new FeatureService($this);
         if (is_string($feature)) {
             $feature = $featureService->findFeature($feature);
@@ -89,5 +94,8 @@ trait CanUseIt
         }
 
         return $featureService->try($feature, $amount, [], true);
+=======
+        return (new FeatureService($this))->canUse($feature, $amount);
+>>>>>>> a70030f (commit)
     }
 }

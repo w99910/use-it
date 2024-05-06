@@ -3,6 +3,7 @@
 ## Table Of Contents
 
 - Introduction
+- Concept
 - Installation
 - Usage
 - Testing
@@ -12,32 +13,206 @@
 
 ## Introduction
 
-- Introduce concept and implementation
+While there are many packages in Laravel like Laravel Pennant (for feature flags) and Spatie Permission (for managing
+user permissions and roles), I prefer making my own method for creating features that can be abilities or consumables.
 
-### Problems
+For example, I want to make an ability feature called "can-post" so users can create posts. Also, I'm thinking of a
+consumable feature called "storage" for using storage in the app. I plan to have different levels of usage for "
+storage," like "100GB storage" or "1TB storage." So, I created my own library to handle these kinds of situations
+better.
 
-You want to create usage
+## Concept
 
-Feature can be either quantity type or ability type.
+In this system, we have four main database models:
 
-Feature name must be unique.
+- Feature: This model handles the creation of features.
+- Ability: It manages interactions with ability-based features.
+- Usage: This model tracks the usage of quantity-based features.
+- Consumption: Responsible for managing the consumption of a usage.
 
-When feature has been granted to a model ( user or team or someone else ), lets called creator, usage will be generated
-for the creator.
-This scenario is aimed for such situation that there is a team and when a team is subscribed to the feature, all team
-members can consume the feature created by the team.
-
-When usage has the same feature id and creator id, higher level usage will be consumed first.
+When you create a new feature, you can grant a user access to that feature. Depending on the type of feature—whether
+it's an ability or a usage—a corresponding ability or usage record will be generated. You can then test this ability or
+usage by using the feature name.
 
 ## Installation
 
-## Usage
+- ### Install via composer
 
-- ### Services
-- ### Middleware
+```php
+composer require thomas-brillion/use-it
+```
+
+- ### Setting up your model
+
+There are two options to use the feature in your class.
+
+- either include `ThomasBrillion\UseIt\Traits\CanUseIt` trait.
+  For example, if you want to use feature in `App\Models\User` class,
+
+```php
+
+use ThomasBrillion\UseIt\Traits\CanUseIt;
+
+class User extends Model {
+    use CanUseIt;
+}
+```
+
+- or implement `ThomasBrillion\UseIt\Interfaces\CanUseFeature` interface.
+
+```php
+
+use ThomasBrillion\UseIt\Interfaces\CanUseFeature;
+
+class User implements CanUseFeature {
+   ...
+}
+```
+
+- ### Create Features
+
+In order to create feature, you can use `create` method of `FeatureService` service.
+
+There are two types of features: `Ability` and `Quantity`.
+
+> Note: Feature name must be unique.
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
+
+$featureService->create(
+   name: 'post',
+   description: 'create a post',
+   type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Ability,
+   meta: [],
+   disabled: false
+)
+```         
+
+- ### Grant User to Feature
+
+Use `grantFeature` method of `FeatureService`.
+
+- If feature is `Ability` type, `Ability` record will be created for user.
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
+
+$featureService->grantFeature('post', new DateTime('1year'))
+```
+
+- if feature is `Quantity` type, `Usage` record will be created. You need pass third parameter as `maximum_value` of
+  feature, optionally fourth parameter as `level` and fifth parameter as `meta`.
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
+
+$featureService->create(
+   name: 'storage',
+   description: 'use storage',
+   type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Quantity,
+   meta: [],
+   disabled: false
+)
+$featureService->grantFeature(feature: 'storage', expireAt:  new DateTime('1year'), total:100, level: 0)
+
+// granting multiple features
+$featureService->grantFeatures(['storage','post'], new DateTime('1month'), 100, 0)
+```  
+
+> Note: You can create multiple usages of same feature with different maximum values and level. When usage is consumed,
+> higher level usage will try to be consumed first.
+
+- ### Checking if user can use feature
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$user->canUseFeature('post'); // return boolean
+
+$user->canUseFeature(name:'storage', amount:1000);
+```
+
+- ### Consuming usable feature
+
+Use `try` method of `FeatureService`. Pass `feature_name` as first parameter and `amount` as second parameter if feature
+is quantitative type.
+
+If feature is `Quantity` type, `Consumption` model object will be returned upon successful process. otherwise, following
+errors will be thrown depending on the condition.
+
+- `Cannot find usages for the feature` if feature is not found
+- `Usage is expired` if user has expired access to the feature
+- `Usage is out of limit` if user has consumed all available amount.
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
+
+$featureService->create(
+   name: 'storage',
+   description: 'create a post',
+   type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Quantity,
+)
+
+$featureService->grantFeature('storage',  new DateTime('1year'), 1000 );
+
+$user->try('storage', 10);
+```
+
+- ### Disable/Enable Feature
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
+
+$featureService->create(
+   name: 'storage',
+   description: 'use storage',
+   type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Quantity,
+)
+
+$featureService->disableFeature('storage');
+
+$featureService->enableFeature('storage');
+```
+
+- ### Revoking access to feature
+
+You can revoke access to feature using `revokeToFeature` method of `FeatureService` class.
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
+
+$featureService->create(
+   name: 'post',
+   description: 'create a post',
+   type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Ability,
+)
+
+$featureService->grantFeature('post', new DateTime('1month'));
+
+$user->canUseFeature('post'); // true
+
+$featureService->revokeToFeature('post');
+$user->canUseFeature('post'); // false
+```
+
+- ## Middleware
 
 In Laravel, `ThomasBrillion\UseIt\Http\Middlewares\CanUseFeatureMiddleware` is automatically registered in service
-provider. You can use it in your route by using middleware alias `can-use-feature` such as
+provider. You can use it in your route by using middleware alias `can-use-feature` by passing the feature name as first
+parameter.
 
 ```php
 Route::post('/post',[ExampleAction::class,'post'])->middleware('can-use-feature:post');
@@ -55,12 +230,24 @@ To check if user can consume usage of feature, you need to pass `amount` input i
 https://example-laravel.test/post?amount=12
 ```
 
-- ### Using Custom Models
+- ## SoftDeletes
 
-You can change `Feature`, `Ability`, `Usage` and `Consumption` models by either provide custom models in config file or
-register it before using it.
+In order to enable `SoftDelete` feature, you can [extend the models](#using-custom-models) and
+follow [laravel soft-delete instructions](https://laravel.com/docs/11.x/eloquent#soft-deleting).
 
-Your custom model must implement corresponding interface to register.
+You also need to add `deleted_at` column in your migration. You can publish migrations using
+
+```bash
+php artisan vendor:publish --tag=use-it
+```
+
+- ## Using Custom Models
+
+You can change `Feature`, `Ability`, `Usage` and `Consumption` models by either providing custom models in config file
+or
+registering it before using it.
+
+Your custom model must implement corresponding interface.
 
 - feature: `ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface`
 - ability: `ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface`
@@ -104,8 +291,15 @@ ModelResolver::registerModel('feature', MyCustomFeature::class);
 
 ## Bug Report
 
+Please kindly create an issue or pull request.
+
 ## License
 
+The MIT LICENSE.
+
 ## Funding
+
+> I am presently facing financial instability. Please inform me if you have any freelance projects or remote job
+> opportunities available.
 
 Please consider supporting me to continue contribution of open-source libraries.

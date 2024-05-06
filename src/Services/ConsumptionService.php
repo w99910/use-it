@@ -8,8 +8,8 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use ThomasBrillion\UseIt\Interfaces\Actions\CanConsumeUsage;
-use ThomasBrillion\UseIt\Models\Consumption;
-use ThomasBrillion\UseIt\Models\Usage;
+use ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface;
+use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
 
 class ConsumptionService
 {
@@ -19,59 +19,58 @@ class ConsumptionService
     }
 
     /**
-     * @param  Usage  $usage
+     * @param  UsageInterface  $usage
      * @param  int  $amount
      * @param  array|null  $meta
-     * @return Model|Consumption
+     * @return Model|ConsumptionInterface
      * @throws Exception
      */
-    public function create(Usage $usage, int $amount, array $meta = null): Model|Consumption
+    public function create(UsageInterface $usage, int $amount, array $meta = null): Model|ConsumptionInterface
     {
         $this->canConsume($usage, $amount);
 
         $consumption = $this->consumer->consumptions()->create([
-            'usage_id' => $usage->id,
+            'usage_id' => $usage->getId(),
             'amount' => $amount,
             'meta' => $meta,
         ]);
-        $usage->spend += $amount;
-        $usage->save();
+        $usage->consume($usage->getSpend() + $amount);
 
         return $consumption;
     }
 
     /**
-     * @param  Usage  $usage
+     * @param  UsageInterface  $usage
      * @param  int  $amount
-     * @return true
+     * @return bool
      * @throws Exception
      */
-    public function canConsume(Usage $usage, int $amount): bool
+    public function canConsume(UsageInterface $usage, int $amount): bool
     {
         // if usage is expired or exceed amount when it is consumed
-        if (new DateTime() > $usage->expire_at) {
+        if (new DateTime() > $usage->getExpiredAt()) {
             throw new Exception('Usage is expired', 401);
         }
 
-        if ($usage->total > 0 && $usage->spend + $amount > $usage->total) {
+        if ($usage->getTotal() > 0 && $usage->getSpend() + $amount > $usage->getTotal()) {
             throw new Exception('Usage is out of limit', 429);
         }
 
         return true;
     }
 
-    public function getConsumptionsOfUsage(Usage $usage): Collection
+    public function getConsumptionsOfUsage(UsageInterface $usage): Collection
     {
-        return $this->consumer->consumptions()->where('usage_id', $usage->id)->get();
+        return $this->consumer->consumptions()->where('usage_id', $usage->getId())->get();
     }
 
     public function getConsumptionsOfUsageBetween(
-        Usage $usage,
+        UsageInterface $usage,
         DateTime|Carbon $startTime,
         DateTime|Carbon $endTime
     ): Collection {
         return $this->consumer->consumptions()
-            ->where('usage_id', $usage->id)
+            ->where('usage_id', $usage->getId())
             ->whereBetween('created_at', [$startTime, $endTime])
             ->get();
     }

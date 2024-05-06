@@ -32,7 +32,9 @@ it('can create ability feature and grant user to it', function () {
     $response = $featureService->grantFeature($feature, $expireAt);
 
     expect($response)->toBeInstanceOf(Ability::class)
-        ->and($featureService->try($feature))->toBeTrue();
+        ->and($featureService->try($feature))->toBeTrue()
+        ->and($user->canUseFeature('Feature1'))->toBeTrue();
+
 });
 
 it('can create quantity feature and consume it', function () {
@@ -40,31 +42,29 @@ it('can create quantity feature and consume it', function () {
 
     $featureService = new FeatureService($user);
 
-    try {
-        $featureService->create(
-            'Feature1',
-            'Feature is new',
-            FeatureType::Quantity
-        );
-    } catch (\Exception $exception) {
-        expect($exception->getMessage())->toBe('Please provide quantity for quantity-typed feature');
-    }
-
     $feature = $featureService->create(
         'Feature2',
         'Feature is new',
         FeatureType::Quantity,
-        100
     );
 
     expect($feature)->toBeInstanceOf(Feature::class)
         ->and($feature->name)->toBe('Feature2');
 
     $expireAt = (new DateTime())->add(DateInterval::createFromDateString('1 day'));
-    $response = $featureService->grantFeature($feature, $expireAt);
 
-    expect($response)->toBeInstanceOf(Usage::class)
+    // throw error if total is not specified for quantitative feature
+    try {
+        $featureService->grantFeature($feature, $expireAt);
+    } catch (\Exception $exception) {
+        expect($exception->getMessage())->toBe('Please specify total to create usage');
+    }
+
+    $response = $featureService->grantFeature($feature, $expireAt, 100);
+    expect($user->canUseFeature('Feature2', 10))->toBeTrue()
+        ->and($response)->toBeInstanceOf(Usage::class)
         ->and($featureService->try($feature, 10))->toBeInstanceOf(Consumption::class);
+
 });
 
 it('can get consumptions of usage', function () {
@@ -96,6 +96,23 @@ it('can revoke feature', function () {
     }
 });
 
+it('can disable/enable feature', function () {
+    $user = User::first();
+
+    $featureService = new FeatureService($user);
+    $feature = Feature::first();
+    $featureService->grantFeature($feature->name, new DateTime('1month'));
+    expect($feature->disabled)->toBeFalse();
+
+    $featureService->disableFeature($feature);
+    expect($feature->refresh()->disabled)->toBeTrue()
+        ->and($user->canUseFeature($feature->name))->toBeFalse();
+
+    $featureService->enableFeature($feature);
+    expect($feature->refresh()->disabled)->toBeFalse()
+        ->and($user->canUseFeature($feature->name))->toBeTrue();
+});
+
 
 it('can register new feature model', function () {
     $customFeature = new class () extends Model implements FeatureInterface {
@@ -109,6 +126,33 @@ it('can register new feature model', function () {
         public function abilities(): HasMany
         {
             return $this->hasMany(Ability::class);
+        }
+
+        public function getId(): string|int
+        {
+            return $this->id;
+        }
+
+        public function getName(): string
+        {
+            return $this->name;
+        }
+
+        public function getType(): FeatureType
+        {
+            return $this->type;
+        }
+
+        public function isDisabled(): bool
+        {
+            return $this->disabled;
+        }
+
+        public function toggleDisability(): bool
+        {
+            $this->disabled = !$this->disabled;
+            $this->save();
+            return $this->disabled;
         }
     };
 

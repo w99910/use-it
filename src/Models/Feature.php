@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
+use ThomasBrillion\UseIt\Support\ModelResolver;
 
 /**
  * @property int|string id
@@ -13,6 +14,7 @@ use ThomasBrillion\UseIt\Support\Enums\FeatureType;
  * @property string $description
  * @property FeatureType $type
  * @property int|null $quantity
+ * @property bool $disabled
  */
 class Feature extends Model implements FeatureInterface
 {
@@ -22,7 +24,6 @@ class Feature extends Model implements FeatureInterface
         'name',
         'description',
         'type', // ability or quantity
-        'quantity',
         'meta',
         'disabled',
     ];
@@ -30,15 +31,43 @@ class Feature extends Model implements FeatureInterface
     protected $casts = [
         'type' => FeatureType::class,
         'meta' => 'json',
+        'disabled' => 'bool',
     ];
 
     public function usages(): HasMany
     {
-        return $this->hasMany(Usage::class);
+        return $this->hasMany(ModelResolver::getUsageModel());
     }
 
     public function abilities(): HasMany
     {
-        return $this->hasMany(Ability::class);
+        return $this->hasMany(ModelResolver::getAbilityModel());
+    }
+
+    public function getId(): string|int
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getType(): FeatureType
+    {
+        return $this->type;
+    }
+
+    public function isDisabled(): bool
+    {
+        return $this->disabled;
+    }
+
+    public function toggleDisability(): bool
+    {
+        $this->disabled = !$this->disabled;
+        $this->save();
+        return $this->disabled;
     }
 }

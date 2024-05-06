@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface;
+use ThomasBrillion\UseIt\Support\ModelResolver;
 
 /**
  * @property int|string $id
@@ -32,6 +33,6 @@ class Ability extends Model implements AbilityInterface
 
     public function feature(): BelongsTo
     {
-        return $this->belongsTo(Feature::class);
+        return $this->belongsTo(ModelResolver::getFeatureModel());
     }
 }
