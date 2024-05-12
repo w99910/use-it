@@ -38,7 +38,7 @@ class UsageService
             throw new Exception('Feature should be quantity type', 422);
         }
 
-        if (! $total) {
+        if (!$total) {
             throw new Exception('Please specify total to create usage', 422);
         }
 
@@ -51,6 +51,23 @@ class UsageService
             'expire_at' => $expire_at,
             'meta' => $meta,
         ]);
+    }
+
+    /**
+     * Getting all usages including expired or invalid usages.
+     * @param  FeatureInterface  $feature
+     * @return Collection
+     * @throws Exception
+     */
+    public function getAllUsages(FeatureInterface $feature): Collection
+    {
+        if ($feature->getType() !== FeatureType::Quantity) {
+            throw new Exception('Feature must be quantity type');
+        }
+
+        return $this->creator->usages()
+            ->where('feature_id', $feature->getId())
+            ->get();
     }
 
     /**

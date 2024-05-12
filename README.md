@@ -49,27 +49,15 @@ composer require thomas-brillion/use-it
 
 - ### Setting up your model
 
-There are two options to use the feature in your class.
-
-- either include `ThomasBrillion\UseIt\Traits\CanUseIt` trait.
-  For example, if you want to use feature in `App\Models\User` class,
-
-```php
-
-use ThomasBrillion\UseIt\Traits\CanUseIt;
-
-class User extends Model {
-    use CanUseIt;
-}
-```
-
-- or implement `ThomasBrillion\UseIt\Interfaces\CanUseFeature` interface.
+Implement `ThomasBrillion\UseIt\Interfaces\CanUseFeature` interface in your model class and
+either include `ThomasBrillion\UseIt\Traits\CanUseIt` trait or resolve the interface on your own.
 
 ```php
 
 use ThomasBrillion\UseIt\Interfaces\CanUseFeature;
 
 class User implements CanUseFeature {
+   use CanUseIt;
    ...
 }
 ```
@@ -107,7 +95,7 @@ $user = User::first(); // or any eloquent model which either uses `CanUseIt` tra
 
 $featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
 
-$featureService->grantFeature('post', new DateTime('1year'))
+$featureService->grantFeature('post', expireAt:  new DateTime('1year'))
 ```
 
 - if feature is `Quantity` type, `Usage` record will be created. You need pass third parameter as `maximum_value` of
@@ -128,7 +116,7 @@ $featureService->create(
 $featureService->grantFeature(feature: 'storage', expireAt:  new DateTime('1year'), total:100, level: 0)
 
 // granting multiple features
-$featureService->grantFeatures(['storage','post'], new DateTime('1month'), 100, 0)
+$featureService->grantFeatures(['storage','post'], expireAt:  new DateTime('1month'), total: 100, level: 0)
 ```  
 
 > Note: You can create multiple usages of same feature with different maximum values and level. When usage is consumed,
@@ -167,9 +155,9 @@ $featureService->create(
    type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Quantity,
 )
 
-$featureService->grantFeature('storage',  new DateTime('1year'), 1000 );
+$featureService->grantFeature('storage',  expireAt: new DateTime('1year'), total: 1000 );
 
-$user->try('storage', 10);
+$user->try('storage', amount: 10);
 ```
 
 - ### Disable/Enable Feature
@@ -205,12 +193,44 @@ $featureService->create(
    type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Ability,
 )
 
-$featureService->grantFeature('post', new DateTime('1month'));
+$featureService->grantFeature('post', expireAt:  new DateTime('1month'));
 
 $user->canUseFeature('post'); // true
 
 $featureService->revokeToFeature('post');
 $user->canUseFeature('post'); // false
+```
+
+- ### Getting current usages of a feature
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$user->getConsumableUsagesOfFeature('post'); // return collection of usages
+```
+
+- ### Getting all usages of a feature
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$user->getAllUsagesOfFeature('post'); // return collection of usages
+```
+
+- ### Getting the current consumable usage of a feature
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$user->getCurrentUsageOfFeature('post');
+```
+
+- ### Getting consumptions of a feature
+
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$user->getConsumptionsOfFeature('post'); // return array of consumptions with key as usage id
 ```
 
 - ## Middleware
