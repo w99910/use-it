@@ -255,6 +255,32 @@ To check if user can consume usage of feature, you need to pass `amount` input i
 https://example-laravel.test/post?amount=12
 ```
 
+- ## Routing
+
+Routes are disabled by default.
+In order to enable it, you can either
+
+- set the `routes` config as `true` or
+- call this static
+  method `\ThomasBrillion\UseIt\Http\Controllers\UseItController::routes();` inside your route file (
+  eg `routes/web.php` )
+
+There are two end-points provided by this package.
+
+- Checking if user can use feature - `/use-it/can/{feature}`
+  In order to check if the feature can be consumed a certain amount, pass query parameters - `amount` in the request.
+
+    ```
+    /use-it/can/post?amount=100
+    ```
+
+- Trying the feature - `/use-it/try/{feature}`
+  In order to consume the feature, pass query parameters - `amount` and `meta` (optional) in the request.
+
+    ```
+    /use-it/try/post?amount=100
+    ```
+
 - ## SoftDeletes
 
 In order to enable `SoftDelete` feature, you can [extend the models](#using-custom-models) and
