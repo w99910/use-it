@@ -22,6 +22,7 @@ class UseItController
         try {
             $user = $request->user();
             $canUse = (new FeatureService($user))->canUse($featureName, $request->get('amount'));
+
             return new Response($canUse);
         } catch (\Exception $exception) {
             return new Response($exception->getMessage(), $exception->getCode() ?: 500);
@@ -32,13 +33,17 @@ class UseItController
     {
         try {
             $user = $request->user();
-            $consumption = (new FeatureService($user))->try($featureName, $request->get('amount'),
-                $request->get('meta'));
+            $consumption = (new FeatureService($user))->try(
+                $featureName,
+                $request->get('amount'),
+                $request->get('meta')
+            );
 
             // convert to array
             if (method_exists($consumption, 'toArray')) {
                 $consumption = $consumption->toArray();
             }
+
             return new Response($consumption);
         } catch (\Exception $exception) {
             return new Response($exception->getMessage(), $exception->getCode() ?: 500);

@@ -22,7 +22,7 @@ trait CanUseIt
      */
     public function abilities(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -35,7 +35,7 @@ trait CanUseIt
      */
     public function usages(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -48,7 +48,7 @@ trait CanUseIt
      */
     public function consumptions(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -142,8 +142,12 @@ trait CanUseIt
 
         foreach ($this->getAllUsagesOfFeature($feature) as $usage) {
             if ($startDate && $endDate) {
-                $consumptions[$usage->getId() ?? $usage->id] = $consumptionService->getConsumptionsOfUsageBetween($usage,
-                    $startDate, $endDate);
+                $consumptions[$usage->getId() ?? $usage->id] = $consumptionService->getConsumptionsOfUsageBetween(
+                    $usage,
+                    $startDate,
+                    $endDate
+                );
+
                 continue;
             }
             $consumptions[$usage->getId() ?? $usage->id] = $consumptionService->getConsumptionsOfUsage($usage);
