@@ -15,12 +15,18 @@ use ThomasBrillion\UseIt\Support\ModelResolver;
 
 class FeatureService
 {
-    protected Builder $featureQuery;
-
-    public function __construct(protected CanUseFeature $creator)
+    protected ?CanUseFeature $creator = null;
+    public function __construct()
     {
-        $this->featureQuery = (new (ModelResolver::getFeatureModel()))->query();
+
     }
+
+    public static function featureQuery()
+    {
+        return (new (ModelResolver::getFeatureModel()))->query();
+    }
+
+
 
     /**
      * @param  string  $name
@@ -31,19 +37,25 @@ class FeatureService
      * @return Model|FeatureInterface
      * @throws Exception
      */
-    public function create(
+    public static function create(
         string $name,
         string $description,
         FeatureType $type,
         array $meta = [],
-        bool $disabled = false
+        bool $disabled = false,
+        ?int $total = null,
+        ?int $expireInSeconds = null,
+        ?int $level = null,
     ): Model|FeatureInterface {
-        return $this->featureQuery->create([
+        return static::featureQuery()->create([
             'name' => $name,
             'description' => $description,
             'type' => $type,
             'meta' => $meta,
             'disabled' => $disabled,
+            'total' => $total,
+            'expire_in_seconds' => $expireInSeconds,
+            'level' => $level,
         ]);
     }
 
@@ -51,9 +63,9 @@ class FeatureService
      * @param  string  $featureName
      * @return Model|null
      */
-    public function findFeature(string $featureName): Model|null
+    public static function findFeature(string $featureName): Model|null
     {
-        return $this->featureQuery->firstWhere('name', $featureName);
+        return static::featureQuery()->firstWhere('name', $featureName);
     }
 
     /**
@@ -61,16 +73,23 @@ class FeatureService
      * @return Model|FeatureInterface
      * @throws Exception
      */
-    public function resolveFeature(string|FeatureInterface $feature): Model|FeatureInterface
+    public static function resolveFeature(string|FeatureInterface $feature): Model|FeatureInterface
     {
         if (is_string($feature)) {
-            $feature = $this->findFeature($feature);
-            if (! $feature) {
+            $feature = static::findFeature($feature);
+            if (!$feature) {
                 throw new Exception('Feature not found', 404);
             }
         }
 
         return $feature;
+    }
+
+    public static function of(CanUseFeature $creator)
+    {
+        $instance = new static();
+        $instance->creator = $creator;
+        return $instance;
     }
 
     /**
@@ -84,20 +103,26 @@ class FeatureService
      */
     public function grantFeature(
         FeatureInterface|string $feature,
-        DateTime $expireAt,
+        ?DateTime $expireAt = null,
         int $total = null,
         int $level = 0,
         array $meta = []
     ): Ability|Usage {
         $feature = $this->resolveFeature($feature);
-
+        if (!$expireAt) {
+            if (!$feature->expire_in_seconds) {
+                throw new Exception('Please specify expire at or expire_in_seconds preset value in feature');
+            }
+            $expireAt = new DateTime;
+            $expireAt->setTimestamp($expireAt->getTimestamp() + $feature->expire_in_seconds);
+        }
         return match ($feature->getType()) {
             FeatureType::Ability => (new AbilityService($this->creator))->create($feature, $expireAt, $meta),
             FeatureType::Quantity => (new UsageService($this->creator))->create(
                 $feature,
                 $expireAt,
-                $total,
-                $level,
+                $total ?? $feature->total,
+                $level ?? $feature->level,
                 $meta
             ),
         };
@@ -132,10 +157,10 @@ class FeatureService
      * @return bool
      * @throws Exception
      */
-    public function disableFeature(FeatureInterface|string $feature): bool
+    public static function disableFeature(FeatureInterface|string $feature): bool
     {
-        $feature = $this->resolveFeature($feature);
-        if (! $feature->isDisabled()) {
+        $feature = static::resolveFeature($feature);
+        if (!$feature->isDisabled()) {
             $feature->toggleDisability();
 
             return true;
@@ -149,9 +174,9 @@ class FeatureService
      * @return bool
      * @throws Exception
      */
-    public function enableFeature(FeatureInterface|string $feature): bool
+    public static function enableFeature(FeatureInterface|string $feature): bool
     {
-        $feature = $this->resolveFeature($feature);
+        $feature = static::resolveFeature($feature);
         if ($feature->isDisabled()) {
             $feature->toggleDisability();
 
@@ -170,10 +195,10 @@ class FeatureService
      */
     public function try(
         FeatureInterface|string $feature,
-        int $amount = null,
+        ?int $amount = null,
         array $meta = []
     ): Model|bool {
-        $feature = $this->resolveFeature($feature);
+        $feature = static::resolveFeature($feature);
         if ($feature->isDisabled()) {
             return false;
         }
@@ -192,9 +217,9 @@ class FeatureService
      */
     public function canUse(
         FeatureInterface|string $feature,
-        int $amount = null
+        ?int $amount = null
     ): bool {
-        $feature = $this->resolveFeature($feature);
+        $feature = static::resolveFeature($feature);
         if ($feature->isDisabled()) {
             return false;
         }
@@ -216,5 +241,17 @@ class FeatureService
         // delete granted abilities and usages of feature
         $this->creator->abilities()->where('feature_id', $feature->getId())->delete();
         $this->creator->usages()->where('feature_id', $feature->getId())->delete();
+    }
+
+    public static function listFeatures(array $meta = [])
+    {
+        $query = static::featureQuery();
+        if (count($meta) > 0) {
+            foreach ($meta as $key => $value) {
+                $aggregateName = is_array($value) ? "whereIn" : "where";
+                $query->$aggregateName("meta->$key", $value);
+            }
+        }
+        return $query->get();
     }
 }

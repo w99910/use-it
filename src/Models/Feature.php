@@ -26,6 +26,9 @@ class Feature extends Model implements FeatureInterface
         'type', // ability or quantity
         'meta',
         'disabled',
+        'total',
+        'expire_in_seconds',
+        'level'
     ];
 
     protected $casts = [
@@ -66,7 +69,7 @@ class Feature extends Model implements FeatureInterface
 
     public function toggleDisability(): bool
     {
-        $this->disabled = ! $this->disabled;
+        $this->disabled = !$this->disabled;
         $this->save();
 
         return $this->disabled;

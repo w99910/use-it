@@ -1,6 +1,7 @@
 {
     "name": "thomas-brillion/use-it",
     "description": "Easy to use Laravel Features, Abilities, Usages and Consumptions",
+    "version": "0.2.0",
     "keywords": [
         "Laravel",
         "Features",

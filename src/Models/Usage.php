@@ -23,7 +23,15 @@ class Usage extends Model implements UsageInterface
     protected $table = 'use_it_usages';
 
     protected $fillable = [
-        'feature_id', 'creator_id', 'creator_type', 'name', 'total', 'spend', 'level', 'expire_at', 'meta',
+        'feature_id',
+        'creator_id',
+        'creator_type',
+        'name',
+        'total',
+        'spend',
+        'level',
+        'expire_at',
+        'meta',
     ];
 
     protected $casts = [

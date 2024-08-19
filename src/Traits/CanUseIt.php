@@ -6,8 +6,10 @@ use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
+use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Services\ConsumptionService;
 use ThomasBrillion\UseIt\Services\FeatureService;
@@ -16,13 +18,21 @@ use ThomasBrillion\UseIt\Support\ModelResolver;
 
 trait CanUseIt
 {
+    public function featureGroups(): BelongsToMany
+    {
+        if (!method_exists($this, 'belongsToMany')) {
+            throw new Exception('belongsToMany method not found', 404);
+        }
+        return $this->belongsToMany(ModelResolver::getFeatureGroupModel());
+    }
+
     /**
      * @return MorphMany
      * @throws Exception
      */
     public function abilities(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -35,7 +45,7 @@ trait CanUseIt
      */
     public function usages(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -48,7 +58,7 @@ trait CanUseIt
      */
     public function consumptions(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -57,14 +67,14 @@ trait CanUseIt
 
     /**
      * @param  string|Feature  $feature
-     * @param  int  $amount
+     * @param  int|null  $amount
      * @param  array  $meta
      * @return Model|bool
      * @throws Exception
      */
-    public function try(string|Feature $feature, int $amount, array $meta = []): Model|bool
+    public function try(string|Feature $feature, ?int $amount = null, array $meta = []): Model|bool
     {
-        return (new FeatureService($this))->try($feature, $amount, $meta);
+        return FeatureService::of($this)->try($feature, $amount, $meta);
     }
 
     /**
@@ -73,9 +83,9 @@ trait CanUseIt
      * @return bool
      * @throws Exception
      */
-    public function canUseFeature(string|Feature $feature, int $amount = null): bool
+    public function canUseFeature(string|Feature $feature, ?int $amount = null): bool
     {
-        return (new FeatureService($this))->canUse($feature, $amount);
+        return FeatureService::of($this)->canUse($feature, $amount);
     }
 
     /**
@@ -85,7 +95,7 @@ trait CanUseIt
      */
     public function getConsumableUsagesOfFeature(string|Feature $feature): Collection
     {
-        $feature = (new FeatureService($this))->resolveFeature($feature);
+        $feature = FeatureService::resolveFeature($feature);
 
         return (new UsageService($this))->getConsumableUsages($feature);
     }
@@ -97,7 +107,7 @@ trait CanUseIt
      */
     public function getAllUsagesOfFeature(string|Feature $feature): Collection
     {
-        $feature = (new FeatureService($this))->resolveFeature($feature);
+        $feature = FeatureService::resolveFeature($feature);
 
         return (new UsageService($this))->getAllUsages($feature);
     }
@@ -109,7 +119,7 @@ trait CanUseIt
      */
     public function getCurrentUsageOfFeature(string|Feature $feature): ?UsageInterface
     {
-        $feature = (new FeatureService($this))->resolveFeature($feature);
+        $feature = FeatureService::resolveFeature($feature);
 
         return (new UsageService($this))->getConsumableUsages($feature)->first();
     }
@@ -126,7 +136,7 @@ trait CanUseIt
         string|DateTime $startDate = null,
         string|DateTime $endDate = null
     ): array {
-        $feature = (new FeatureService($this))->resolveFeature($feature);
+        $feature = FeatureService::resolveFeature($feature);
 
         $consumptionService = new ConsumptionService($this);
 

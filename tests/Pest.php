@@ -1,14 +1,14 @@
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Schema\Blueprint;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 
-$databasePath = __DIR__.'/../database.sqlite';
+$databasePath = __DIR__ . '/../database.sqlite';
 
-if (! file_exists($databasePath)) {
+if (!file_exists($databasePath)) {
     exec("touch $databasePath");
 }
 
@@ -44,9 +44,44 @@ $schema->create('use_it_features', function (Blueprint $table) {
     $table->enum('type', FeatureType::values());
     $table->json('meta')->nullable();
     $table->boolean('disabled')->default(false);
+
+    // usage feature type preset
+    $table->unsignedBigInteger('total')->nullable();
+    $table->bigInteger('expire_in_seconds')->nullable();
+    $table->bigInteger('level')->nullable(); // higher level will consume first
+
     $table->timestamps();
 });
 
+$schema->dropIfExists('use_it_feature_groups');
+$schema->create('use_it_feature_groups', function (Blueprint $table) {
+    $table->id();
+    $table->string('name', length: 256)->unique();
+    $table->string('description', length: 256);
+    $table->json('meta')->nullable();
+    $table->boolean('disabled')->default(false);
+    $table->timestamps();
+});
+
+// Create pivot table for featureGroup and feature pivot table
+$schema->dropIfExists('use_it_feature_group_feature');
+$schema->create('use_it_feature_group_feature', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('feature_group_id')->references('id')->on('use_it_feature_groups')->onDelete('cascade');
+    $table->foreignId('feature_id')->references('id')->on('use_it_features')->onDelete('cascade');
+    $table->timestamps();
+});
+
+
+// Create pivot table for featureGroup and creator
+
+$schema->dropIfExists('use_it_feature_group_users');
+$schema->create('use_it_feature_group_users', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('feature_group_id')->references('id')->on('use_it_feature_groups')->onDelete('cascade');
+    $table->foreignId('user_id')->references('id')->on('use_it_users')->onDelete('cascade');
+    $table->timestamps();
+});
 
 // Usages table
 $schema->dropIfExists('use_it_usages');

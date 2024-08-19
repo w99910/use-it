@@ -44,4 +44,16 @@ class AbilityService
             ->where('feature_id', $feature->getId())
             ->where('expire_at', '>', new DateTime())->exists();
     }
+
+    public function list(array $meta = [])
+    {
+        $query = $this->creator->abilities();
+        if (count($meta) > 0) {
+            foreach ($meta as $key => $value) {
+                $aggregateName = is_array($value) ? "whereIn" : "where";
+                $query->$aggregateName("meta.$key", $value);
+            }
+        }
+        return $query->get();
+    }
 }

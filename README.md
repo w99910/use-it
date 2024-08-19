@@ -14,7 +14,31 @@
 - [License](#license)
 - [Funding](#funding)
 
+> `FeatureGroup` is introduced `v0.2.0`. It is similar to `Role` in `roles-permissions` concept. You can assign multiple `features` to the `feature-group` and then those features will be automatically attached to the user if user is given access to that `feature-group`. 
+
 ## Introduction
+
+
+Example intuitive workflow - 
+
+Let's say you offer a premium plan that gives following features:
+- a team that can add 4 members
+- a 4TB storage 
+- access to advanced AI-powered model. 
+
+Then you can create features such as 
+- `Mini-Team` feature that is consumable by adding member where maximum 4 members is limited.
+   ```php
+   
+   ```
+
+- `Regular-Storage` feature that is consumable by every memeber who has access to such feature till 4TB storage is consumed.
+- `AI-model` feature which gives access/permission to the advanced AI-powered model.   
+
+
+
+---
+
 
 While there are many packages in Laravel like Laravel Pennant (for feature flags) and Spatie Permission (for managing
 user permissions and roles), I prefer making my own method for creating features that can be abilities or consumables.
@@ -350,7 +374,6 @@ The MIT LICENSE.
 
 ## Funding
 
-> I am presently facing financial instability. Please inform me if you have any freelance projects or remote job
-> opportunities available.
+Consider [buying me a coffee](https://buy.stripe.com/eVa4hXaHdc0t1Nu144) or informing me if you have any freelance projects or remote job opportunities available.
 
 Please consider supporting me to continue contribution of open-source libraries.

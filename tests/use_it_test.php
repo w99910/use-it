@@ -6,20 +6,23 @@ use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
 use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Consumption;
 use ThomasBrillion\UseIt\Models\Feature;
+use ThomasBrillion\UseIt\Models\FeatureGroup;
 use ThomasBrillion\UseIt\Models\Usage;
+use ThomasBrillion\UseIt\Services\AbilityService;
 use ThomasBrillion\UseIt\Services\ConsumptionService;
+use ThomasBrillion\UseIt\Services\FeatureGroupService;
 use ThomasBrillion\UseIt\Services\FeatureService;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 use ThomasBrillion\UseIt\Support\ModelResolver;
 
-require_once __DIR__.'/User.php';
+require_once __DIR__ . '/User.php';
 
 it('can create ability feature and grant user to it', function () {
     $user = User::create();
 
-    $featureService = new FeatureService($user);
+    $featureService = FeatureService::of($user);
 
-    $feature = $featureService->create(
+    $feature = FeatureService::create(
         'Feature1',
         'Feature is new',
         FeatureType::Ability
@@ -40,9 +43,9 @@ it('can create ability feature and grant user to it', function () {
 it('can create quantity feature and consume it', function () {
     $user = User::first();
 
-    $featureService = new FeatureService($user);
+    $featureService = FeatureService::of($user);
 
-    $feature = $featureService->create(
+    $feature = FeatureService::create(
         'Feature2',
         'Feature is new',
         FeatureType::Quantity,
@@ -78,7 +81,7 @@ it('can get consumptions of usage', function () {
 it('can revoke feature', function () {
     $user = User::first();
 
-    $featureService = new FeatureService($user);
+    $featureService = FeatureService::of($user);
 
     $abilityFeature = Feature::first();
     expect($featureService->try($abilityFeature))->toBeTrue();
@@ -99,7 +102,7 @@ it('can revoke feature', function () {
 it('can disable/enable feature', function () {
     $user = User::first();
 
-    $featureService = new FeatureService($user);
+    $featureService = FeatureService::of($user);
     $feature = Feature::first();
     $featureService->grantFeature($feature->name, new DateTime('1month'));
     expect($feature->disabled)->toBeFalse();
@@ -113,10 +116,97 @@ it('can disable/enable feature', function () {
         ->and($user->canUseFeature($feature->name))->toBeTrue();
 });
 
+it('can list features with meta data', function () {
+    $user = User::create();
+    $featureService = FeatureService::of($user);
+
+    $feature = FeatureService::create(
+        'Fruit Feature',
+        'Feature is new',
+        FeatureType::Ability,
+        [
+            'fruit' => 'apple',
+        ]
+    );
+    expect($featureService->listFeatures([
+        'fruit' => ['apple']
+    ])->count())->toBe(1);
+
+    expect($featureService->listFeatures([
+        'fruit' => ['hello', 'world']
+    ])->count())->toBe(0);
+
+    // expect()->toBe($feature);
+});
+
+it('can create feature group', function () {
+    $user = User::create();
+
+    $featureGroup = FeatureGroupService::create(
+        'normal',
+        'normal user group'
+    );
+    expect($featureGroup)->toBeInstanceOf(FeatureGroup::class)->and($featureGroup->name)->toBe('normal');
+});
+
+it('can add features to feature group', function () {
+    $user = User::create();
+
+    $featureGroup = FeatureGroupService::create(
+        'premium-plan',
+        'gives access to premium features'
+    );
+
+    $fourTeamMembersFeature = FeatureService::create('add-team-members', 'add four team members', FeatureType::Quantity, total: 4, expireInSeconds: 60 * 60 * 24 * 30);
+    $fourTeraByteStorage = FeatureService::create('use-four-terabyte-storage', 'use 4TB storage', FeatureType::Quantity, total: 4194304, expireInSeconds: 60 * 60 * 24 * 30);
+    $AIPoweredModelAccess = FeatureService::create('ai-powered-model', 'get access to AI powered model', FeatureType::Ability, expireInSeconds: 60 * 60 * 24 * 30);
+
+    FeatureGroupService::addFeatures($featureGroup, [
+        $fourTeamMembersFeature,
+        $fourTeraByteStorage,
+        $AIPoweredModelAccess,
+    ]);
+
+    expect(FeatureGroupService::hasFeature($featureGroup, $fourTeamMembersFeature))->toBeTrue();
+    expect(FeatureGroupService::hasFeature($featureGroup, $fourTeraByteStorage))->toBeTrue();
+    expect(FeatureGroupService::hasFeature($featureGroup, $AIPoweredModelAccess))->toBeTrue();
+});
+
+it('can grant user access to feature group', function () {
+    $user = User::first();
+
+    FeatureGroupService::of($user)->grantFeatureGroup('premium-plan');
+
+    expect($user->try('add-team-members', 1))->toBeTrue();
+    expect($user->try('use-four-terabyte-storage', 2000))->toBeTrue();
+    expect($user->try('ai-powered-model'))->toBeTrue();
+});
+
+it('can revoke user access to feature group', function () {
+    $user = User::first();
+
+    FeatureGroupService::of($user)->revokeFeatureGroup('premium-plan');
+
+    expect($user->canUseFeature('add-team-members', 1))->toBeFalse();
+    expect($user->canUseFeature('use-four-terabyte-storage', 2000))->toBeFalse();
+    expect($user->canUseFeature('ai-powered-model'))->toBeFalse();
+});
+
+it('can remove features to feature group', function () {
+    FeatureGroupService::removeFeature('premium-plan', 'add-team-members');
+    FeatureGroupService::removeFeature('premium-plan', 'ai-powered-model');
+    expect(FeatureGroupService::hasFeature('premium-plan', 'add-team-members'))->toBeFalse();
+    expect(FeatureGroupService::hasFeature('premium-plan', 'ai-powered-model'))->toBeFalse();
+});
+
+
+
+
 
 it('can register new feature model', function () {
     $customFeature = new class () extends Model implements FeatureInterface {
         protected $table = 'use_it_custom_features';
+
 
         public function usages(): HasMany
         {
@@ -150,7 +240,7 @@ it('can register new feature model', function () {
 
         public function toggleDisability(): bool
         {
-            $this->disabled = ! $this->disabled;
+            $this->disabled = !$this->disabled;
             $this->save();
 
             return $this->disabled;
@@ -161,3 +251,4 @@ it('can register new feature model', function () {
 
     expect(ModelResolver::getFeatureModel())->toBe(get_class($customFeature));
 });
+

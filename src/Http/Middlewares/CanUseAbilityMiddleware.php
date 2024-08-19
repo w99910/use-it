@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class CanUseFeatureMiddleware
+class CanUseAbilityMiddleware
 {
     public function handle(Request $request, Closure $next, string $feature, string $guard = null): Response
     {

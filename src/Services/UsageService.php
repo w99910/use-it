@@ -38,7 +38,7 @@ class UsageService
             throw new Exception('Feature should be quantity type', 422);
         }
 
-        if (! $total) {
+        if (!$total) {
             throw new Exception('Please specify total to create usage', 422);
         }
 
@@ -106,7 +106,7 @@ class UsageService
         $usages = $this->getConsumableUsages($feature);
 
         if ($usages->isEmpty()) {
-            throw new Exception('Cannot find usages for the feature', 404);
+            throw new Exception("Cannot find usages for the feature {$feature->getName()}", 404);
         }
 
         $consumptionService = new ConsumptionService($this->creator);
