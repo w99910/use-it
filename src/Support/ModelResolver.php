@@ -33,7 +33,7 @@ class ModelResolver
         if (function_exists('config')) {
             $defaultModels = config('use-it.models');
 
-            if (!empty($defaultModels)) {
+            if (! empty($defaultModels)) {
                 foreach ($defaultModels as $name => $model) {
                     $this->resolveModel($name, $model);
                 }
@@ -46,30 +46,30 @@ class ModelResolver
      */
     protected function resolveModel(string $name, string $model): void
     {
-        if (!array_key_exists($name, $this->models)) {
+        if (! array_key_exists($name, $this->models)) {
             throw new \Exception("$name is not found. Only " . implode(
                 ',',
                 array_keys($this->models)
             ) . " are supported.");
         }
 
-        if ($name === 'feature-group' && !new $model() instanceof FeatureGroupInterface) {
+        if ($name === 'feature-group' && ! new $model() instanceof FeatureGroupInterface) {
             throw new \Exception("$model class must implement ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface");
         }
 
-        if ($name === 'feature' && !new $model() instanceof FeatureInterface) {
+        if ($name === 'feature' && ! new $model() instanceof FeatureInterface) {
             throw new \Exception("$model class must implement ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface");
         }
 
-        if ($name === 'ability' && !new $model() instanceof AbilityInterface) {
+        if ($name === 'ability' && ! new $model() instanceof AbilityInterface) {
             throw new \Exception("$model class must implement ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface");
         }
 
-        if ($name === 'usage' && !new $model() instanceof UsageInterface) {
+        if ($name === 'usage' && ! new $model() instanceof UsageInterface) {
             throw new \Exception("$model class must implement ThomasBrillion\UseIt\Interfaces\Models\UsageInterface");
         }
 
-        if ($name === 'consumption' && !new $model() instanceof ConsumptionInterface) {
+        if ($name === 'consumption' && ! new $model() instanceof ConsumptionInterface) {
             throw new \Exception("$model class must implement ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface");
         }
 
@@ -81,7 +81,7 @@ class ModelResolver
      */
     protected static function getInstance(): ModelResolver
     {
-        if (!static::$instance) {
+        if (! static::$instance) {
             static::$instance = new static();
         }
 
