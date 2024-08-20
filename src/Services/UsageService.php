@@ -38,7 +38,7 @@ class UsageService
             throw new Exception('Feature should be quantity type', 422);
         }
 
-        if (!$total) {
+        if (! $total) {
             throw new Exception('Please specify total to create usage', 422);
         }
 

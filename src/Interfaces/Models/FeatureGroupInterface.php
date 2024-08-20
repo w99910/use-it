@@ -3,7 +3,6 @@
 namespace ThomasBrillion\UseIt\Interfaces\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 interface FeatureGroupInterface
 {

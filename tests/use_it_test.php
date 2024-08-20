@@ -8,7 +8,6 @@ use ThomasBrillion\UseIt\Models\Consumption;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Models\FeatureGroup;
 use ThomasBrillion\UseIt\Models\Usage;
-use ThomasBrillion\UseIt\Services\AbilityService;
 use ThomasBrillion\UseIt\Services\ConsumptionService;
 use ThomasBrillion\UseIt\Services\FeatureGroupService;
 use ThomasBrillion\UseIt\Services\FeatureService;
@@ -124,11 +123,11 @@ it('can list features with meta data', function () {
         ]
     );
     expect($featureService->listFeatures([
-        'fruit' => ['apple']
+        'fruit' => ['apple'],
     ])->count())->toBe(1);
 
     expect($featureService->listFeatures([
-        'fruit' => ['hello', 'world']
+        'fruit' => ['hello', 'world'],
     ])->count())->toBe(0);
 });
 
@@ -193,7 +192,6 @@ it('can register new feature model', function () {
     $customFeature = new class () extends Model implements FeatureInterface {
         protected $table = 'use_it_custom_features';
 
-
         public function usages(): HasMany
         {
             return $this->hasMany(Usage::class);
@@ -226,7 +224,7 @@ it('can register new feature model', function () {
 
         public function toggleDisability(): bool
         {
-            $this->disabled = !$this->disabled;
+            $this->disabled = ! $this->disabled;
             $this->save();
 
             return $this->disabled;
@@ -237,4 +235,3 @@ it('can register new feature model', function () {
 
     expect(ModelResolver::getFeatureModel())->toBe(get_class($customFeature));
 });
-

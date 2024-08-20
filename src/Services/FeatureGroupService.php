@@ -2,12 +2,12 @@
 
 namespace ThomasBrillion\UseIt\Services;
 
-use ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface;
-use ThomasBrillion\UseIt\Support\ModelResolver;
+use DateTime;
 use Exception;
 use ThomasBrillion\UseIt\Interfaces\Actions\CanUseFeatureGroup;
+use ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
-use DateTime;
+use ThomasBrillion\UseIt\Support\ModelResolver;
 
 class FeatureGroupService
 {
@@ -40,7 +40,7 @@ class FeatureGroupService
 
         if (is_string($featureGroup)) {
             $featureGroup = static::findFeatureGroup($featureGroup);
-            if (!$featureGroup) {
+            if (! $featureGroup) {
                 throw new Exception('Feature Group not found', 404);
             }
         }
@@ -94,8 +94,9 @@ class FeatureGroupService
 
     public static function of(CanUseFeatureGroup $creator)
     {
-        $instance = new static;
+        $instance = new static();
         $instance->creator = $creator;
+
         return $instance;
     }
 
@@ -103,6 +104,7 @@ class FeatureGroupService
         string|FeatureGroupInterface $featureGroup,
     ) {
         $featureGroup = static::resolveFeatureGroup($featureGroup);
+
         return $this->creator->featureGroups()->where('name', $featureGroup->name)->exists();
     }
 
@@ -122,7 +124,7 @@ class FeatureGroupService
         $featureService = FeatureService::of($this->creator);
 
         foreach ($featureGroup->features as $feature) {
-            if (!($feature instanceof FeatureInterface)) {
+            if (! ($feature instanceof FeatureInterface)) {
                 continue;
             }
             $featureService->grantFeature($feature, $expireAt, $total, $level, $meta);
@@ -136,7 +138,7 @@ class FeatureGroupService
     ) {
         $featureGroup = static::resolveFeatureGroup($featureGroup);
 
-        if (!$this->hasFeatureGroup($featureGroup)) {
+        if (! $this->hasFeatureGroup($featureGroup)) {
             throw new Exception('Feature Group is not granted to the creator');
         }
 
@@ -144,7 +146,7 @@ class FeatureGroupService
 
 
         foreach ($featureGroup->features as $feature) {
-            if (!($feature instanceof FeatureInterface)) {
+            if (! ($feature instanceof FeatureInterface)) {
                 continue;
             }
             $featureService->revokeToFeature($feature);

@@ -54,6 +54,7 @@ class AbilityService
                 $query->$aggregateName("meta.$key", $value);
             }
         }
+
         return $query->get();
     }
 }

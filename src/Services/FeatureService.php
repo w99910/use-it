@@ -4,7 +4,6 @@ namespace ThomasBrillion\UseIt\Services;
 
 use DateTime;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use ThomasBrillion\UseIt\Interfaces\Actions\CanUseFeature;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
@@ -16,6 +15,7 @@ use ThomasBrillion\UseIt\Support\ModelResolver;
 class FeatureService
 {
     protected ?CanUseFeature $creator = null;
+
     public function __construct()
     {
 
@@ -25,8 +25,6 @@ class FeatureService
     {
         return (new (ModelResolver::getFeatureModel()))->query();
     }
-
-
 
     /**
      * @param  string  $name
@@ -77,7 +75,7 @@ class FeatureService
     {
         if (is_string($feature)) {
             $feature = static::findFeature($feature);
-            if (!$feature) {
+            if (! $feature) {
                 throw new Exception('Feature not found', 404);
             }
         }
@@ -89,6 +87,7 @@ class FeatureService
     {
         $instance = new static();
         $instance->creator = $creator;
+
         return $instance;
     }
 
@@ -109,13 +108,14 @@ class FeatureService
         array $meta = []
     ): Ability|Usage {
         $feature = $this->resolveFeature($feature);
-        if (!$expireAt) {
-            if (!$feature->expire_in_seconds) {
+        if (! $expireAt) {
+            if (! $feature->expire_in_seconds) {
                 throw new Exception('Please specify expire at or expire_in_seconds preset value in feature');
             }
-            $expireAt = new DateTime;
+            $expireAt = new DateTime();
             $expireAt->setTimestamp($expireAt->getTimestamp() + $feature->expire_in_seconds);
         }
+
         return match ($feature->getType()) {
             FeatureType::Ability => (new AbilityService($this->creator))->create($feature, $expireAt, $meta),
             FeatureType::Quantity => (new UsageService($this->creator))->create(
@@ -160,7 +160,7 @@ class FeatureService
     public static function disableFeature(FeatureInterface|string $feature): bool
     {
         $feature = static::resolveFeature($feature);
-        if (!$feature->isDisabled()) {
+        if (! $feature->isDisabled()) {
             $feature->toggleDisability();
 
             return true;
@@ -188,7 +188,7 @@ class FeatureService
 
     /**
      * Delete feature and its usage or quantity. By setting `true` to all, consumptions will be deleted
-     * 
+     *
      * @param  FeatureInterface|string  $feature
      * @return bool
      * @throws Exception
@@ -199,6 +199,7 @@ class FeatureService
         switch ($feature->getType()) {
             case FeatureType::Ability:
                 $feature->abilities()->delete();
+
                 break;
             case FeatureType::Quantity:
                 if ($all) {
@@ -208,6 +209,7 @@ class FeatureService
                 }
 
                 $feature->usages()->delete();
+
                 break;
         }
         $feature->delete();
@@ -281,6 +283,7 @@ class FeatureService
                 $query->$aggregateName("meta->$key", $value);
             }
         }
+
         return $query->get();
     }
 }

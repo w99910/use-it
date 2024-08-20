@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
-use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Services\ConsumptionService;
 use ThomasBrillion\UseIt\Services\FeatureGroupService;
@@ -22,9 +21,10 @@ trait CanUseIt
 {
     public function featureGroups(): BelongsToMany
     {
-        if (!method_exists($this, 'belongsToMany')) {
+        if (! method_exists($this, 'belongsToMany')) {
             throw new Exception('belongsToMany method not found', 404);
         }
+
         return $this->belongsToMany(ModelResolver::getFeatureGroupModel());
     }
 
@@ -34,7 +34,7 @@ trait CanUseIt
      */
     public function abilities(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -47,7 +47,7 @@ trait CanUseIt
      */
     public function usages(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -60,7 +60,7 @@ trait CanUseIt
      */
     public function consumptions(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 

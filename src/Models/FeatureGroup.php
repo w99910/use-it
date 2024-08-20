@@ -1,6 +1,7 @@
 <?php
 
 namespace ThomasBrillion\UseIt\Models;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface;
