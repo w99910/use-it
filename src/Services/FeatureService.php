@@ -139,7 +139,7 @@ class FeatureService
      */
     public function grantFeatures(
         array $features,
-        DateTime $expireAt,
+        ?DateTime $expireAt = null,
         int $total = null,
         int $level = 0,
         array $meta = []
