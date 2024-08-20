@@ -1,5 +1,7 @@
 # Use-It - Features, Abilities, Usages and Consumptions
 
+![preview](preview.png)
+
 ## Table Of Contents
 
 - [Introduction](#introduction)
@@ -17,73 +19,6 @@
 > `FeatureGroup` is introduced `v0.2.0`. It is similar to `Role` in `roles-permissions` concept. You can assign multiple `features` to the `feature-group` and then those features will be automatically attached to the user if user is given access to that `feature-group`. 
 
 ## Introduction
-
-
-Example intuitive workflow - 
-
-Let's say you offer a premium plan that gives following features:
-- a team that can add 4 members
-- a 4TB storage 
-- access to advanced AI-powered model. 
-
-Then you can create features such as 
-- `Mini-Team` feature that is consumable by adding member where maximum 4 members is limited. **( Note: Since you are gonna use `feature-group`, it is better to set `total` preset and `expireInSeconds` preset. You can still set those values when you grant the user to that group but as for `Quantity` type features, they all will have same usages since you are passing the same `total` value.)**
-   ```php
-   $fourTeamMembersFeature = FeatureService::create('mini-team', 'add four team members', FeatureType::Quantity, total: 4, expireInSeconds: 60 * 60 * 24 * 30);
-   ```
-
-- `Regular-Storage` feature that is consumable by every memeber who has access to such feature till 4TB storage is consumed. 
-  ```php
-  $fourTeraByteStorage = FeatureService::create('regular-storage', 'use 4TB storage', FeatureType::Quantity, total: 4194304, expireInSeconds: 60 * 60 * 24 * 30);
-  ```
-- `AI-model` feature which gives access/permission to the advanced AI-powered model.   
-   ```php
-   $AIPoweredModelAccess = FeatureService::create('ai-powered-model', 'get access to AI powered model', FeatureType::Ability, expireInSeconds: 60 * 60 * 24 * 30);
-   ```
-
-- Create the feature group. 
-  ```php
-  $premiumFeatureGroup = FeatureGroupService::create('premium-user', 'this is feature group for premium users');
-  ```
-
-- Grant the user to that feature group
-  ```php
-  $user = User::first();
-  FeatureGroupService::of($user)->grantFeatureGroup('premium-user');
-  ```
-- Then check if user can use the features
-
-  ```php
-  expect($user->canUseFeature('mini-team', 1))->toBeTrue();
-
-  expect($user->canUseFeature('regular-storage', 2000))->toBeTrue();
-
-  expect($user->canUseFeature('ai-powered-model'))->toBeTrue();
-  ```
-
-- Try to use some features
-  ```php
-  expect($user->try('mini-team', 1))->toBeInstanceOf(ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface::class);
-
-  expect($user->try('regular-storage', 2000))->toBeInstanceOf(ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface::class);
-
-  expect($user->try('ai-powered-model'))->toBeTrue(); 
-  ```
-
-- Revoke feature group
-  ```php
-  $user = User::first();
-
-  FeatureGroupService::of($user)->revokeFeatureGroup('premium-plan');
-
-  expect($user->canUseFeature('mini-team', 1))->toBeFalse();
-  expect($user->canUseFeature('regular-storage', 2000))->toBeFalse();
-  expect($user->canUseFeature('ai-powered-model'))->toBeFalse();
-  ```
-
-> In order to remove specific features, use `FeatureService::of($user)->revokeToFeature('feature_name_or_feature_object')`
----
-
 
 While there are many packages in Laravel like Laravel Pennant (for feature flags) and Spatie Permission (for managing
 user permissions and roles), I would like to create a feature that is not only an ability or permission but also a consumable one. 
