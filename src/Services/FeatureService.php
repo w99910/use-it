@@ -75,7 +75,7 @@ class FeatureService
     {
         if (is_string($feature)) {
             $feature = static::findFeature($feature);
-            if (!$feature) {
+            if (! $feature) {
                 throw new Exception('Feature not found', 404);
             }
         }
@@ -108,8 +108,8 @@ class FeatureService
         array $meta = []
     ): AbilityInterface|UsageInterface {
         $feature = $this->resolveFeature($feature);
-        if (!$expireAt) {
-            if (!$feature->expire_in_seconds) {
+        if (! $expireAt) {
+            if (! $feature->expire_in_seconds) {
                 throw new Exception('Please specify expire at or expire_in_seconds preset value in feature');
             }
             $expireAt = new DateTime();
@@ -160,7 +160,7 @@ class FeatureService
     public static function disableFeature(FeatureInterface|string $feature): bool
     {
         $feature = static::resolveFeature($feature);
-        if (!$feature->isDisabled()) {
+        if (! $feature->isDisabled()) {
             $feature->toggleDisability();
 
             return true;
