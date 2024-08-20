@@ -99,6 +99,13 @@ class FeatureGroupService
         return $instance;
     }
 
+    public function hasFeatureGroup(
+        string|FeatureGroupInterface $featureGroup,
+    ) {
+        $featureGroup = static::resolveFeatureGroup($featureGroup);
+        return $this->creator->featureGroups()->where('name', $featureGroup->name)->exists();
+    }
+
     public function grantFeatureGroup(
         string|FeatureGroupInterface $featureGroup,
         ?DateTime $expireAt = null,
@@ -108,12 +115,11 @@ class FeatureGroupService
     ) {
         $featureGroup = static::resolveFeatureGroup($featureGroup);
 
-        if ($this->creator->featureGroups()->where('name', $featureGroup->name)->exists()) {
+        if ($this->hasFeatureGroup($featureGroup)) {
             throw new Exception('Feature Group is already granted to the creator');
         }
 
         $featureService = FeatureService::of($this->creator);
-
 
         foreach ($featureGroup->features as $feature) {
             if (!($feature instanceof FeatureInterface)) {
@@ -130,7 +136,7 @@ class FeatureGroupService
     ) {
         $featureGroup = static::resolveFeatureGroup($featureGroup);
 
-        if (!$this->creator->featureGroups()->where('name', $featureGroup->name)->exists()) {
+        if (!$this->hasFeatureGroup($featureGroup)) {
             throw new Exception('Feature Group is not granted to the creator');
         }
 

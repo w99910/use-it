@@ -14,15 +14,15 @@ class UseItServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->make('config')->get('use-it.routes', true)) {
-            $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
         }
 
         $this->publishesMigrations([
-            __DIR__.'/../database/migrations' => database_path('migrations'),
-        ]);
+            __DIR__ . '/../database/migrations' => database_path('migrations'),
+        ], 'use-it-migrations');
 
         $this->publishes([
-            __DIR__.'/../config/use-it.php' => $this->app->configPath('use-it.php'),
+            __DIR__ . '/../config/use-it.php' => $this->app->configPath('use-it.php'),
         ], 'use-it');
 
         // Register middleware

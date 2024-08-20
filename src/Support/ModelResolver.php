@@ -5,6 +5,7 @@ namespace ThomasBrillion\UseIt\Support;
 use ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
+use ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
 use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Consumption;
@@ -48,6 +49,10 @@ class ModelResolver
                 ',',
                 array_keys($this->models)
             ) . " are supported.");
+        }
+
+        if ($name === 'feature-group' && !new $model() instanceof FeatureGroupInterface) {
+            throw new \Exception("$model class must implement ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface");
         }
 
         if ($name === 'feature' && !new $model() instanceof FeatureInterface) {

@@ -91,12 +91,7 @@ it('can revoke feature', function () {
     $usageFeature = Feature::skip(1)->first();
     expect($featureService->try($usageFeature, 10))->toBeInstanceOf(Consumption::class);
     $featureService->revokeToFeature($usageFeature);
-
-    try {
-        expect($featureService->try($usageFeature, 10))->toBeFalse();
-    } catch (Exception $exception) {
-        expect($exception->getMessage())->toBe('Cannot find usages for the feature');
-    }
+    expect($featureService->try($usageFeature, 10))->toBeFalse();
 });
 
 it('can disable/enable feature', function () {
@@ -135,13 +130,9 @@ it('can list features with meta data', function () {
     expect($featureService->listFeatures([
         'fruit' => ['hello', 'world']
     ])->count())->toBe(0);
-
-    // expect()->toBe($feature);
 });
 
 it('can create feature group', function () {
-    $user = User::create();
-
     $featureGroup = FeatureGroupService::create(
         'normal',
         'normal user group'
@@ -150,14 +141,12 @@ it('can create feature group', function () {
 });
 
 it('can add features to feature group', function () {
-    $user = User::create();
-
     $featureGroup = FeatureGroupService::create(
         'premium-plan',
         'gives access to premium features'
     );
 
-    $fourTeamMembersFeature = FeatureService::create('add-team-members', 'add four team members', FeatureType::Quantity, total: 4, expireInSeconds: 60 * 60 * 24 * 30);
+    $fourTeamMembersFeature = FeatureService::create('mini-team', 'add four team members', FeatureType::Quantity, total: 4, expireInSeconds: 60 * 60 * 24 * 30);
     $fourTeraByteStorage = FeatureService::create('use-four-terabyte-storage', 'use 4TB storage', FeatureType::Quantity, total: 4194304, expireInSeconds: 60 * 60 * 24 * 30);
     $AIPoweredModelAccess = FeatureService::create('ai-powered-model', 'get access to AI powered model', FeatureType::Ability, expireInSeconds: 60 * 60 * 24 * 30);
 
@@ -177,9 +166,9 @@ it('can grant user access to feature group', function () {
 
     FeatureGroupService::of($user)->grantFeatureGroup('premium-plan');
 
-    expect($user->try('add-team-members', 1))->toBeTrue();
-    expect($user->try('use-four-terabyte-storage', 2000))->toBeTrue();
-    expect($user->try('ai-powered-model'))->toBeTrue();
+    expect($user->canUseFeature('mini-team', 1))->toBeTrue();
+    expect($user->canUseFeature('use-four-terabyte-storage', 2000))->toBeTrue();
+    expect($user->canUseFeature('ai-powered-model'))->toBeTrue();
 });
 
 it('can revoke user access to feature group', function () {
@@ -187,20 +176,17 @@ it('can revoke user access to feature group', function () {
 
     FeatureGroupService::of($user)->revokeFeatureGroup('premium-plan');
 
-    expect($user->canUseFeature('add-team-members', 1))->toBeFalse();
+    expect($user->canUseFeature('mini-team', 1))->toBeFalse();
     expect($user->canUseFeature('use-four-terabyte-storage', 2000))->toBeFalse();
     expect($user->canUseFeature('ai-powered-model'))->toBeFalse();
 });
 
 it('can remove features to feature group', function () {
-    FeatureGroupService::removeFeature('premium-plan', 'add-team-members');
+    FeatureGroupService::removeFeature('premium-plan', 'mini-team');
     FeatureGroupService::removeFeature('premium-plan', 'ai-powered-model');
-    expect(FeatureGroupService::hasFeature('premium-plan', 'add-team-members'))->toBeFalse();
+    expect(FeatureGroupService::hasFeature('premium-plan', 'mini-team'))->toBeFalse();
     expect(FeatureGroupService::hasFeature('premium-plan', 'ai-powered-model'))->toBeFalse();
 });
-
-
-
 
 
 it('can register new feature model', function () {

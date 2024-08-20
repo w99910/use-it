@@ -11,5 +11,7 @@ return [
         'usage' => \ThomasBrillion\UseIt\Models\Usage::class,
 
         'consumption' => \ThomasBrillion\UseIt\Models\Consumption::class,
+
+        'feature-group' => \ThomasBrillion\UseIt\Models\FeatureGroup::class,
     ]
 ];

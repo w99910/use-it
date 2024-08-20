@@ -106,7 +106,7 @@ class UsageService
         $usages = $this->getConsumableUsages($feature);
 
         if ($usages->isEmpty()) {
-            throw new Exception("Cannot find usages for the feature {$feature->getName()}", 404);
+            return false;
         }
 
         $consumptionService = new ConsumptionService($this->creator);

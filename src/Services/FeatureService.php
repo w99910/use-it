@@ -187,6 +187,35 @@ class FeatureService
     }
 
     /**
+     * Delete feature and its usage or quantity. By setting `true` to all, consumptions will be deleted
+     * 
+     * @param  FeatureInterface|string  $feature
+     * @return bool
+     * @throws Exception
+     */
+    public static function deleteFeature(FeatureInterface|string $feature, bool $all = false)
+    {
+        $feature = static::resolveFeature($feature);
+        switch ($feature->getType()) {
+            case FeatureType::Ability:
+                $feature->abilities()->delete();
+                break;
+            case FeatureType::Quantity:
+                if ($all) {
+                    foreach ($feature->usages as $usage) {
+                        $usage->consumptions()->delete();
+                    }
+                }
+
+                $feature->usages()->delete();
+                break;
+        }
+        $feature->delete();
+
+        return true;
+    }
+
+    /**
      * @param  FeatureInterface|string  $feature
      * @param  int|null  $amount
      * @param  array  $meta

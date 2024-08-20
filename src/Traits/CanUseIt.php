@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
 use ThomasBrillion\UseIt\Models\Ability;
 use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Services\ConsumptionService;
+use ThomasBrillion\UseIt\Services\FeatureGroupService;
 use ThomasBrillion\UseIt\Services\FeatureService;
 use ThomasBrillion\UseIt\Services\UsageService;
 use ThomasBrillion\UseIt\Support\ModelResolver;
@@ -86,6 +88,15 @@ trait CanUseIt
     public function canUseFeature(string|Feature $feature, ?int $amount = null): bool
     {
         return FeatureService::of($this)->canUse($feature, $amount);
+    }
+
+    /**
+     * @param  string|FeatureGroupInterface  $featureGroup
+     * @return bool
+     */
+    public function hasFeatureGroup(string|FeatureGroupInterface $featureGroup)
+    {
+        return FeatureGroupService::of($this)->hasFeatureGroup($featureGroup);
     }
 
     /**

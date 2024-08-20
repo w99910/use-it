@@ -27,26 +27,70 @@ Let's say you offer a premium plan that gives following features:
 - access to advanced AI-powered model. 
 
 Then you can create features such as 
-- `Mini-Team` feature that is consumable by adding member where maximum 4 members is limited.
+- `Mini-Team` feature that is consumable by adding member where maximum 4 members is limited. **( Note: Since you are gonna use `feature-group`, it is better to set `total` preset and `expireInSeconds` preset. You can still set those values when you grant the user to that group but as for `Quantity` type features, they all will have same usages since you are passing the same `total` value.)**
    ```php
-   
+   $fourTeamMembersFeature = FeatureService::create('mini-team', 'add four team members', FeatureType::Quantity, total: 4, expireInSeconds: 60 * 60 * 24 * 30);
    ```
 
-- `Regular-Storage` feature that is consumable by every memeber who has access to such feature till 4TB storage is consumed.
+- `Regular-Storage` feature that is consumable by every memeber who has access to such feature till 4TB storage is consumed. 
+  ```php
+  $fourTeraByteStorage = FeatureService::create('regular-storage', 'use 4TB storage', FeatureType::Quantity, total: 4194304, expireInSeconds: 60 * 60 * 24 * 30);
+  ```
 - `AI-model` feature which gives access/permission to the advanced AI-powered model.   
+   ```php
+   $AIPoweredModelAccess = FeatureService::create('ai-powered-model', 'get access to AI powered model', FeatureType::Ability, expireInSeconds: 60 * 60 * 24 * 30);
+   ```
 
+- Create the feature group. 
+  ```php
+  $premiumFeatureGroup = FeatureGroupService::create('premium-user', 'this is feature group for premium users');
+  ```
 
+- Grant the user to that feature group
+  ```php
+  $user = User::first();
+  FeatureGroupService::of($user)->grantFeatureGroup('premium-user');
+  ```
+- Then check if user can use the features
 
+  ```php
+  expect($user->canUseFeature('mini-team', 1))->toBeTrue();
+
+  expect($user->canUseFeature('regular-storage', 2000))->toBeTrue();
+
+  expect($user->canUseFeature('ai-powered-model'))->toBeTrue();
+  ```
+
+- Try to use some features
+  ```php
+  expect($user->try('mini-team', 1))->toBeInstanceOf(ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface::class);
+
+  expect($user->try('regular-storage', 2000))->toBeInstanceOf(ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface::class);
+
+  expect($user->try('ai-powered-model'))->toBeTrue(); 
+  ```
+
+- Revoke feature group
+  ```php
+  $user = User::first();
+
+  FeatureGroupService::of($user)->revokeFeatureGroup('premium-plan');
+
+  expect($user->canUseFeature('mini-team', 1))->toBeFalse();
+  expect($user->canUseFeature('regular-storage', 2000))->toBeFalse();
+  expect($user->canUseFeature('ai-powered-model'))->toBeFalse();
+  ```
+
+> In order to remove specific features, use `FeatureService::of($user)->revokeToFeature('feature_name_or_feature_object')`
 ---
 
 
 While there are many packages in Laravel like Laravel Pennant (for feature flags) and Spatie Permission (for managing
-user permissions and roles), I prefer making my own method for creating features that can be abilities or consumables.
+user permissions and roles), I would like to create a feature that is not only an ability or permission but also a consumable one. 
 
 For example, I want to make an ability feature called "can-post" so users can create posts. Also, I'm thinking of a
 consumable feature called "storage" for using storage in the app. I plan to have different levels of usage for "
-storage," like "100GB storage" or "1TB storage." So, I created my own library to handle these kinds of situations
-better.
+storage," like "100GB storage" or "1TB storage."
 
 ## Concept
 
@@ -56,6 +100,7 @@ In this system, we have four main database models:
 - Ability: It manages interactions with ability-based features.
 - Usage: This model tracks the usage of quantity-based features.
 - Consumption: Responsible for managing the consumption of a usage.
+- FeatureGroup: Responsible for handling feature groups
 
 When you create a new feature, you can grant a user access to that feature. Depending on the type of feature—whether
 it's an ability or a usage—a corresponding ability or usage record will be generated. You can then test this ability or
@@ -69,12 +114,32 @@ usage by using the feature name.
 composer require thomas-brillion/use-it
 ```
 
-## Usage
+- ### Setting up migrations
+
+Publish the migration presets.
+
+```bash
+php artisan vendor:publish --tag=use-it-migrations
+```
+
+Note: If you are using `feature group` on different table other than `users`, please create a pivot table and change the table in the relationship such as 
+
+```php
+public function featureGroups(): BelongsToMany
+{
+   return $this->belongsToMany(ThomasBrillion\UseIt\Support\ModelResolver::getFeatureGroupModel(), 'your_pivot_table_name');
+}
+```
+
+Please consult [laravel documentation](https://laravel.com/docs/11.x/eloquent-relationships#many-to-many) for more details. 
+
 
 - ### Setting up your model
 
-Implement `ThomasBrillion\UseIt\Interfaces\CanUseFeature` interface in your model class and
+Implement either `ThomasBrillion\UseIt\Interfaces\CanUseFeature` or `ThomasBrillion\UseIt\Interfaces\CanUseFeatureGroup` interface in your model class and
 either include `ThomasBrillion\UseIt\Traits\CanUseIt` trait or resolve the interface on your own.
+
+> It is not mandatory to implement `ThomasBrillion\UseIt\Interfaces\CanUseFeatureGroup` interface if you don't want to use feature group.
 
 ```php
 
@@ -86,6 +151,10 @@ class User implements CanUseFeature {
 }
 ```
 
+## Usage
+
+
+
 - ### Create Features
 
 In order to create feature, you can use `create` method of `FeatureService` service.
@@ -95,11 +164,7 @@ There are two types of features: `Ability` and `Quantity`.
 > Note: Feature name must be unique.
 
 ```php
-$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
-
-$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
-
-$featureService->create(
+ThomasBrillion\UseIt\Services\FeatureService::create(
    name: 'post',
    description: 'create a post',
    type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Ability,
@@ -117,9 +182,7 @@ Use `grantFeature` method of `FeatureService`.
 ```php
 $user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
 
-$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
-
-$featureService->grantFeature('post', expireAt:  new DateTime('1year'))
+ThomasBrillion\UseIt\Services\FeatureService::of($user)->grantFeature('post', expireAt:  new DateTime('1year'))
 ```
 
 - if feature is `Quantity` type, `Usage` record will be created. You need pass third parameter as `maximum_value` of
@@ -128,19 +191,17 @@ $featureService->grantFeature('post', expireAt:  new DateTime('1year'))
 ```php
 $user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
 
-$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
-
-$featureService->create(
+ThomasBrillion\UseIt\Services\FeatureService::create(
    name: 'storage',
    description: 'use storage',
    type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Quantity,
    meta: [],
    disabled: false
 )
-$featureService->grantFeature(feature: 'storage', expireAt:  new DateTime('1year'), total:100, level: 0)
+ThomasBrillion\UseIt\Services\FeatureService::of($user)->grantFeature(feature: 'storage', expireAt:  new DateTime('1year'), total: 100, level: 0)
 
 // granting multiple features
-$featureService->grantFeatures(['storage','post'], expireAt:  new DateTime('1month'), total: 100, level: 0)
+ThomasBrillion\UseIt\Services\FeatureService::of($user)->grantFeatures(['storage','post'], expireAt:  new DateTime('1month'), total: 100, level: 0)
 ```  
 
 > Note: You can create multiple usages of same feature with different maximum values and level. When usage is consumed,
@@ -173,33 +234,33 @@ $user = User::first(); // or any eloquent model which either uses `CanUseIt` tra
 
 $featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
 
-$featureService->create(
+ThomasBrillion\UseIt\Services\FeatureService::create(
    name: 'storage',
    description: 'create a post',
    type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Quantity,
 )
 
-$featureService->grantFeature('storage',  expireAt: new DateTime('1year'), total: 1000 );
+ThomasBrillion\UseIt\Services\FeatureService::of($user)->grantFeature('storage',  expireAt: new DateTime('1year'), total: 1000 );
 
 $user->try('storage', amount: 10);
 ```
 
 - ### Disable/Enable Feature
 
+You can toggle accessiblity to the feature.
+
 ```php
 $user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
 
-$featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
-
-$featureService->create(
+ThomasBrillion\UseIt\Services\FeatureService::create(
    name: 'storage',
    description: 'use storage',
    type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Quantity,
 )
 
-$featureService->disableFeature('storage');
+ThomasBrillion\UseIt\Services\FeatureService::disableFeature('storage');
 
-$featureService->enableFeature('storage');
+ThomasBrillion\UseIt\Services\FeatureService::enableFeature('storage');
 ```
 
 - ### Revoking access to feature
@@ -211,17 +272,17 @@ $user = User::first(); // or any eloquent model which either uses `CanUseIt` tra
 
 $featureService = new ThomasBrillion\UseIt\Services\FeatureService($user);
 
-$featureService->create(
+ThomasBrillion\UseIt\Services\FeatureService::create(
    name: 'post',
    description: 'create a post',
    type: \ThomasBrillion\UseIt\Support\Enums\FeatureType::Ability,
 )
 
-$featureService->grantFeature('post', expireAt:  new DateTime('1month'));
+ThomasBrillion\UseIt\Services\FeatureService::of($user)->grantFeature('post', expireAt:  new DateTime('1month'));
 
 $user->canUseFeature('post'); // true
 
-$featureService->revokeToFeature('post');
+ThomasBrillion\UseIt\Services\FeatureService::of($user)->revokeToFeature('post');
 $user->canUseFeature('post'); // false
 ```
 
@@ -256,6 +317,54 @@ $user = User::first(); // or any eloquent model which either uses `CanUseIt` tra
 
 $user->getConsumptionsOfFeature('post'); // return array of consumptions with key as usage id
 ```
+
+- ## Feature Group
+
+A feature group is a logical grouping of features, offering a centralized way to access and revoke features instead of interacting with a feature manually.
+
+- Creating feature group
+```php
+$featureGroup = ThomasBrillion\UseIt\Models\FeatureGroup::create(
+        'premium-plan',
+        'gives access to premium features'
+);
+```
+
+- Create new features or add existing features to feature group
+
+I recommand you to set preset data for `Quantity` type feature such as `total` or `expireInSeconds`. 
+```php
+$fourTeamMembersFeature = FeatureService::create('mini-team', 'add four team members', FeatureType::Quantity, total: 4, expireInSeconds: 60 * 60 * 24 * 30);
+
+FeatureGroupService::addFeatures($featureGroup, [
+        $fourTeamMembersFeature,
+        'can-post'
+]);
+```
+
+- Grant user to that feature group.
+
+```php
+$user = User::first();
+
+FeatureGroupService::of($user)->grantFeatureGroup('premium-plan');
+
+expect($user->canUseFeature('mini-team', 1))->toBeTrue();
+expect($user->canUseFeature('can-post'))->toBeTrue();
+```
+
+- Checking if user has feature group
+
+```php
+$user->hasFeatureGroup('premium-plan'); // return boolean.
+```
+
+- Revoke feature group
+
+```php
+FeatureGroupService::of($user)->revokeFeatureGroup('premium-plan');
+```
+
 
 - ## Middleware
 
@@ -325,6 +434,7 @@ registering it before using it.
 Your custom model must implement corresponding interface.
 
 - feature: `ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface`
+- featureGroup: `ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface`
 - ability: `ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface`
 - usage: `ThomasBrillion\UseIt\Interfaces\Models\UsageInterface`
 - consumption: `ThomasBrillion\UseIt\Interfaces\Models\ConsumptionInterface`
@@ -340,6 +450,8 @@ Your custom model must implement corresponding interface.
     
         // Change your custom model here
         'feature' => MyCustomFeatureModel::class,
+
+        'feature-group' => \ThomasBrillion\UseIt\Models\FeatureGroup::class,
 
         'ability' => \ThomasBrillion\UseIt\Models\Ability::class,
 
