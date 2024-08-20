@@ -4,6 +4,7 @@ namespace ThomasBrillion\UseIt\Services;
 
 use DateTime;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use ThomasBrillion\UseIt\Interfaces\Actions\CanCreateAbility;
 use ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface;
@@ -45,7 +46,7 @@ class AbilityService
             ->where('expire_at', '>', new DateTime())->exists();
     }
 
-    public function list(array $meta = [])
+    public function list(array $meta = []): Collection
     {
         $query = $this->creator->abilities();
         if (count($meta) > 0) {

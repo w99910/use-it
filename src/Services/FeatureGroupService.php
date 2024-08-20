@@ -40,7 +40,7 @@ class FeatureGroupService
 
         if (is_string($featureGroup)) {
             $featureGroup = static::findFeatureGroup($featureGroup);
-            if (! $featureGroup) {
+            if (!$featureGroup) {
                 throw new Exception('Feature Group not found', 404);
             }
         }
@@ -124,7 +124,7 @@ class FeatureGroupService
         $featureService = FeatureService::of($this->creator);
 
         foreach ($featureGroup->features as $feature) {
-            if (! ($feature instanceof FeatureInterface)) {
+            if (!($feature instanceof FeatureInterface)) {
                 continue;
             }
             $featureService->grantFeature($feature, $expireAt, $total, $level, $meta);
@@ -138,7 +138,7 @@ class FeatureGroupService
     ) {
         $featureGroup = static::resolveFeatureGroup($featureGroup);
 
-        if (! $this->hasFeatureGroup($featureGroup)) {
+        if (!$this->hasFeatureGroup($featureGroup)) {
             throw new Exception('Feature Group is not granted to the creator');
         }
 
@@ -146,7 +146,7 @@ class FeatureGroupService
 
 
         foreach ($featureGroup->features as $feature) {
-            if (! ($feature instanceof FeatureInterface)) {
+            if (!($feature instanceof FeatureInterface)) {
                 continue;
             }
             $featureService->revokeToFeature($feature);

@@ -6,9 +6,9 @@ use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use ThomasBrillion\UseIt\Interfaces\Actions\CanUseFeature;
+use ThomasBrillion\UseIt\Interfaces\Models\AbilityInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
-use ThomasBrillion\UseIt\Models\Ability;
-use ThomasBrillion\UseIt\Models\Usage;
+use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
 use ThomasBrillion\UseIt\Support\Enums\FeatureType;
 use ThomasBrillion\UseIt\Support\ModelResolver;
 
@@ -75,7 +75,7 @@ class FeatureService
     {
         if (is_string($feature)) {
             $feature = static::findFeature($feature);
-            if (! $feature) {
+            if (!$feature) {
                 throw new Exception('Feature not found', 404);
             }
         }
@@ -97,7 +97,7 @@ class FeatureService
      * @param  int|null  $total
      * @param  int  $level
      * @param  array  $meta
-     * @return Ability|Usage
+     * @return AbilityInterface|UsageInterface
      * @throws Exception
      */
     public function grantFeature(
@@ -106,10 +106,10 @@ class FeatureService
         int $total = null,
         int $level = 0,
         array $meta = []
-    ): Ability|Usage {
+    ): AbilityInterface|UsageInterface {
         $feature = $this->resolveFeature($feature);
-        if (! $expireAt) {
-            if (! $feature->expire_in_seconds) {
+        if (!$expireAt) {
+            if (!$feature->expire_in_seconds) {
                 throw new Exception('Please specify expire at or expire_in_seconds preset value in feature');
             }
             $expireAt = new DateTime();
@@ -160,7 +160,7 @@ class FeatureService
     public static function disableFeature(FeatureInterface|string $feature): bool
     {
         $feature = static::resolveFeature($feature);
-        if (! $feature->isDisabled()) {
+        if (!$feature->isDisabled()) {
             $feature->toggleDisability();
 
             return true;
