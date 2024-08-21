@@ -81,12 +81,14 @@ class UsageService
             throw new Exception('Feature must be quantity type');
         }
 
-        return $this->creator->usages()
+        $usages = $this->creator->usages()
             ->where('feature_id', $feature->getId())
             ->where('expire_at', '>', new DateTime())
-            ->whereColumn('total', '>', 'spend')
             ->orderByDesc('level')
             ->get();
+
+        // whereColumn doesn't support in mongodb eloquent builder.
+        return $usages->filter(fn($usage) => $usage->total > $usage->spend);
     }
 
     /**
