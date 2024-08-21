@@ -38,7 +38,7 @@ class UsageService
             throw new Exception('Feature should be quantity type', 422);
         }
 
-        if (! $total) {
+        if (!$total) {
             throw new Exception('Please specify total to create usage', 422);
         }
 
@@ -59,7 +59,7 @@ class UsageService
      * @return Collection
      * @throws Exception
      */
-    public function getAllUsages(FeatureInterface $feature): Collection
+    public function getAllUsagesOf(FeatureInterface $feature): Collection
     {
         if ($feature->getType() !== FeatureType::Quantity) {
             throw new Exception('Feature must be quantity type');
@@ -75,7 +75,7 @@ class UsageService
      * @return Collection
      * @throws Exception
      */
-    public function getConsumableUsages(FeatureInterface $feature): Collection
+    public function getConsumableUsagesOf(FeatureInterface $feature): Collection
     {
         if ($feature->getType() !== FeatureType::Quantity) {
             throw new Exception('Feature must be quantity type');
@@ -103,7 +103,7 @@ class UsageService
         array $meta = [],
         bool $dryTest = false
     ): bool|ConsumptionInterface {
-        $usages = $this->getConsumableUsages($feature);
+        $usages = $this->getConsumableUsagesOf($feature);
 
         if ($usages->isEmpty()) {
             return false;
@@ -124,5 +124,16 @@ class UsageService
         }
 
         return false;
+    }
+
+    public function list(bool $valid = true)
+    {
+        $query = $this->creator->usages();
+
+        if ($valid) {
+            $query->where('expire_at', '>', new DateTime())->whereColumn('total', '>', 'spend');
+        }
+
+        return $query->orderByDesc('level')->get();
     }
 }

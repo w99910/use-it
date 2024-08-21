@@ -21,7 +21,7 @@ trait CanUseIt
 {
     public function featureGroups(): BelongsToMany
     {
-        if (! method_exists($this, 'belongsToMany')) {
+        if (!method_exists($this, 'belongsToMany')) {
             throw new Exception('belongsToMany method not found', 404);
         }
 
@@ -34,7 +34,7 @@ trait CanUseIt
      */
     public function abilities(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -47,7 +47,7 @@ trait CanUseIt
      */
     public function usages(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -60,7 +60,7 @@ trait CanUseIt
      */
     public function consumptions(): MorphMany
     {
-        if (! method_exists($this, 'morphMany')) {
+        if (!method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -108,7 +108,7 @@ trait CanUseIt
     {
         $feature = FeatureService::resolveFeature($feature);
 
-        return (new UsageService($this))->getConsumableUsages($feature);
+        return (new UsageService($this))->getConsumableUsagesOf($feature);
     }
 
     /**
@@ -120,7 +120,7 @@ trait CanUseIt
     {
         $feature = FeatureService::resolveFeature($feature);
 
-        return (new UsageService($this))->getAllUsages($feature);
+        return (new UsageService($this))->getAllUsagesOf($feature);
     }
 
     /**
@@ -132,7 +132,7 @@ trait CanUseIt
     {
         $feature = FeatureService::resolveFeature($feature);
 
-        return (new UsageService($this))->getConsumableUsages($feature)->first();
+        return (new UsageService($this))->getConsumableUsagesOf($feature)->first();
     }
 
     /**

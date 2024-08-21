@@ -31,6 +31,10 @@ class AbilityService
             throw new Exception('Feature should be ability type', 401);
         }
 
+        if ($this->try($feature)) {
+            throw new Exception('Feature is already granted and still valid', 403);
+        }
+
         return $this->creator->abilities()->create([
             'name' => $feature->getName(),
             'feature_id' => $feature->getId(),
