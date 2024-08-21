@@ -133,9 +133,15 @@ class UsageService
         $query = $this->creator->usages();
 
         if ($valid) {
-            $query->where('expire_at', '>', new DateTime())->whereColumn('total', '>', 'spend');
+            $query->where('expire_at', '>', new DateTime());
         }
 
-        return $query->orderByDesc('level')->get();
+        $usages = $query->orderByDesc('level')->get();
+
+        if ($valid) {
+            $usages = $usages->filter(fn($usage) => $usage->total > $usage->spend);
+        }
+
+        return $usages;
     }
 }
