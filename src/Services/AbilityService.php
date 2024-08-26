@@ -50,6 +50,25 @@ class AbilityService
             ->where('expire_at', '>', new DateTime())->exists();
     }
 
+    public function update(FeatureInterface $feature, DateTime $expire_at = null, array $meta = [])
+    {
+        $ability = $this->creator->abilities()->firstWhere('feature_id', $feature->getId());
+
+        if (!$ability) {
+            throw new Exception('Ability not found', 404);
+        }
+
+        if ($expire_at) {
+            $ability->expire_at = $expire_at;
+        }
+
+        if (!empty($meta)) {
+            $ability->meta = $meta;
+        }
+
+        return $ability->save();
+    }
+
     public function list(array $meta = []): Collection
     {
         $query = $this->creator->abilities();

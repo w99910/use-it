@@ -128,6 +128,33 @@ class UsageService
         return false;
     }
 
+    public function update(FeatureInterface $feature, int $total = null, int $spend = null, DateTime $expire_at = null, array $meta = [])
+    {
+        $usage = $this->creator->usages()->firstWhere('feature_id', $feature->getId());
+
+        if (!$usage) {
+            throw new Exception('Usage not found', 404);
+        }
+
+        if ($total) {
+            $usage->total = $total;
+        }
+
+        if ($spend) {
+            $usage->spend = $spend;
+        }
+
+        if ($expire_at) {
+            $usage->expire_at = $expire_at;
+        }
+
+        if (!empty($meta)) {
+            $usage->meta = $meta;
+        }
+
+        return $usage->save();
+    }
+
     public function list(bool $valid = true)
     {
         $query = $this->creator->usages();
