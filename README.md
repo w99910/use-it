@@ -144,12 +144,30 @@ ThomasBrillion\UseIt\Services\FeatureService::of($user)->grantFeatures(['storage
 
 - ### Checking if user can use feature
 
+You can use 
+
+- `canUseFeature` to check if user can use **all** of provided feature/s. 
 ```php
 $user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
 
-$user->canUseFeature('post'); // return boolean
+$user->canUseFeature('post');
 
-$user->canUseFeature(name:'storage', amount:1000);
+$user->canUseFeature('storage', amount:1000);
+
+$user->canUseFeature('upload,storage', amount: 1000);
+
+$user->canUseFeature(['upload', 'storage'], amount: 1000);
+```
+
+- `canUseAnyFeature to check if user can use **any** of provided feature/s. You can pass either comma-separated string or string or array.
+```php
+$user = User::first(); // or any eloquent model which either uses `CanUseIt` trait or implements `CanUseFeature` interface.
+
+$user->canUseAnyFeature('post');
+
+$user->canUseAnyFeature('post,upload,comment');
+
+$user->canUseAnyFeature(['post','upload','comment'], amount:1000);
 ```
 
 - ### Consuming usable feature
@@ -304,20 +322,22 @@ FeatureGroupService::of($user)->revokeFeatureGroup('premium-plan');
 - ## Middleware
 
 In Laravel, `ThomasBrillion\UseIt\Http\Middlewares\CanUseFeatureMiddleware` is automatically registered in service
-provider. You can use it in your route by using middleware alias `can-use-feature` by passing the feature name as first
+provider. You can use it in your route by using middleware alias `can-use-feature` and `can-use-any-feature` by passing the feature name as first
 parameter.
 
 ```php
 Route::post('/post',[ExampleAction::class,'post'])->middleware('can-use-feature:post');
 ```
 
-You can provide your auth guard as second parameter.
+You can provide multiple feature names by separating with comma.
 
 ```php
-Route::post('/post',[ExampleAction::class,'post'])->middleware('can-use-feature:post,student');
+Route::post('/post',[ExampleAction::class,'post'])->middleware('can-use-feature:post,comment,upload');
+
+Route::post('/post',[ExampleAction::class,'post'])->middleware('can-use-any-feature:post,comment');
 ```
 
-To check if user can consume usage of feature, you need to pass `amount` input in the request.
+> Note: To check if user can consume usage of feature, you need to pass `amount` input in the request.
 
 ```text
 https://example-laravel.test/post?amount=12

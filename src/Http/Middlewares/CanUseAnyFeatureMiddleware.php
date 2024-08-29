@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class CanUseFeatureMiddleware
+class CanUseAnyFeatureMiddleware
 {
     public function handle(Request $request, Closure $next, ...$features): Response
     {
@@ -15,12 +15,12 @@ class CanUseFeatureMiddleware
             return new Response('Please authenticate yourself.', 401);
         }
 
-        if (!method_exists($user, 'canUseFeature')) {
+        if (!method_exists($user, 'canUseAnyFeature')) {
             return new Response('Please Add \ThomasBrillion\UseIt\Traits\CanUseIt Trait in your model', 404);
         }
 
-        if (!$user->canUseFeature($features, $request->input('amount'))) {
-            return new Response("Sorry. You are not allowed to proceed", 403);
+        if (!$user->canUseAnyFeature($features, $request->input('amount'))) {
+            return new Response("Sorry. You are not allowed to proceed.", 403);
         }
 
         return $next($request);

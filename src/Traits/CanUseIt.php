@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use ThomasBrillion\UseIt\Interfaces\Models\FeatureGroupInterface;
+use ThomasBrillion\UseIt\Interfaces\Models\FeatureInterface;
 use ThomasBrillion\UseIt\Interfaces\Models\UsageInterface;
-use ThomasBrillion\UseIt\Models\Feature;
 use ThomasBrillion\UseIt\Services\ConsumptionService;
 use ThomasBrillion\UseIt\Services\FeatureGroupService;
 use ThomasBrillion\UseIt\Services\FeatureService;
@@ -68,26 +68,61 @@ trait CanUseIt
     }
 
     /**
-     * @param  string|Feature  $feature
+     * @param  string|FeatureInterface  $feature
      * @param  int|null  $amount
      * @param  array  $meta
      * @return Model|bool
      * @throws Exception
      */
-    public function try(string|Feature $feature, ?int $amount = null, array $meta = []): Model|bool
+    public function try(string|FeatureInterface $feature, ?int $amount = null, array $meta = []): Model|bool
     {
         return FeatureService::of($this)->try($feature, $amount, $meta);
     }
 
     /**
-     * @param  string|Feature  $feature
+     * @param  string|FeatureInterface|array  $feature
      * @param  int|null  $amount
      * @return bool
      * @throws Exception
      */
-    public function canUseFeature(string|Feature $feature, ?int $amount = null): bool
+    public function canUseFeature(string|FeatureInterface|array $features, ?int $amount = null): bool
     {
-        return FeatureService::of($this)->canUse($feature, $amount);
+        $featureService = FeatureService::of($this);
+
+        if (is_string($features)) {
+            $features = explode(',', $features);
+        }
+
+        if ($features instanceof FeatureInterface) {
+            $features = [$features];
+        }
+
+        foreach ($features as $feature) {
+            if (!$featureService->canUse($feature, $amount)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function canUseAnyFeature(string|array $features, ?int $amount = null)
+    {
+        $canUse = false;
+        if (is_string($features)) {
+            $features = explode(',', $features);
+        }
+
+        $featureService = FeatureService::of($this);
+
+        foreach ($features as $feature) {
+            if ($featureService->canUse($feature, $amount)) {
+                $canUse = true;
+                break;
+            }
+        }
+
+        return $canUse;
     }
 
     /**
@@ -100,11 +135,11 @@ trait CanUseIt
     }
 
     /**
-     * @param  string|Feature  $feature
+     * @param  string|FeatureInterface  $feature
      * @return Collection
      * @throws Exception
      */
-    public function getConsumableUsagesOfFeature(string|Feature $feature): Collection
+    public function getConsumableUsagesOfFeature(string|FeatureInterface $feature): Collection
     {
         $feature = FeatureService::resolveFeature($feature);
 
@@ -112,11 +147,11 @@ trait CanUseIt
     }
 
     /**
-     * @param  string|Feature  $feature
+     * @param  string|FeatureInterface  $feature
      * @return Collection
      * @throws Exception
      */
-    public function getAllUsagesOfFeature(string|Feature $feature): Collection
+    public function getAllUsagesOfFeature(string|FeatureInterface $feature): Collection
     {
         $feature = FeatureService::resolveFeature($feature);
 
@@ -124,11 +159,11 @@ trait CanUseIt
     }
 
     /**
-     * @param  string|Feature  $feature
+     * @param  string|FeatureInterface  $feature
      * @return UsageInterface|null
      * @throws Exception
      */
-    public function getCurrentUsageOfFeature(string|Feature $feature): ?UsageInterface
+    public function getCurrentUsageOfFeature(string|FeatureInterface $feature): ?UsageInterface
     {
         $feature = FeatureService::resolveFeature($feature);
 
@@ -136,14 +171,14 @@ trait CanUseIt
     }
 
     /**
-     * @param  string|Feature  $feature
+     * @param  string|FeatureInterface  $feature
      * @param  string|DateTime|null  $startDate
      * @param  string|DateTime|null  $endDate
      * @return array
      * @throws Exception
      */
     public function getConsumptionsOfFeature(
-        string|Feature $feature,
+        string|FeatureInterface $feature,
         string|DateTime $startDate = null,
         string|DateTime $endDate = null
     ): array {
