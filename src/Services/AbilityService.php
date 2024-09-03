@@ -54,7 +54,7 @@ class AbilityService
     {
         $ability = $this->creator->abilities()->firstWhere('feature_id', $feature->getId());
 
-        if (!$ability) {
+        if (! $ability) {
             throw new Exception('Ability not found', 404);
         }
 
@@ -62,7 +62,7 @@ class AbilityService
             $ability->expire_at = $expire_at;
         }
 
-        if (!empty($meta)) {
+        if (! empty($meta)) {
             $ability->meta = $meta;
         }
 

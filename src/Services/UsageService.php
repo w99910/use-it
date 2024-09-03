@@ -38,7 +38,7 @@ class UsageService
             throw new Exception('Feature should be quantity type', 422);
         }
 
-        if (!$total) {
+        if (! $total) {
             throw new Exception('Please specify total to create usage', 422);
         }
 
@@ -88,7 +88,7 @@ class UsageService
             ->get();
 
         // whereColumn doesn't support in mongodb eloquent builder.
-        return $usages->filter(fn($usage) => $usage->total > $usage->spend);
+        return $usages->filter(fn ($usage) => $usage->total > $usage->spend);
     }
 
     /**
@@ -132,7 +132,7 @@ class UsageService
     {
         $usage = $this->creator->usages()->firstWhere('feature_id', $feature->getId());
 
-        if (!$usage) {
+        if (! $usage) {
             throw new Exception('Usage not found', 404);
         }
 
@@ -148,7 +148,7 @@ class UsageService
             $usage->expire_at = $expire_at;
         }
 
-        if (!empty($meta)) {
+        if (! empty($meta)) {
             $usage->meta = $meta;
         }
 
@@ -166,7 +166,7 @@ class UsageService
         $usages = $query->orderByDesc('level')->get();
 
         if ($valid) {
-            $usages = $usages->filter(fn($usage) => $usage->total > $usage->spend);
+            $usages = $usages->filter(fn ($usage) => $usage->total > $usage->spend);
         }
 
         return $usages;

@@ -21,7 +21,7 @@ trait CanUseIt
 {
     public function featureGroups(): BelongsToMany
     {
-        if (!method_exists($this, 'belongsToMany')) {
+        if (! method_exists($this, 'belongsToMany')) {
             throw new Exception('belongsToMany method not found', 404);
         }
 
@@ -34,7 +34,7 @@ trait CanUseIt
      */
     public function abilities(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -47,7 +47,7 @@ trait CanUseIt
      */
     public function usages(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -60,7 +60,7 @@ trait CanUseIt
      */
     public function consumptions(): MorphMany
     {
-        if (!method_exists($this, 'morphMany')) {
+        if (! method_exists($this, 'morphMany')) {
             throw new Exception('morphMany method not found', 404);
         }
 
@@ -98,7 +98,7 @@ trait CanUseIt
         }
 
         foreach ($features as $feature) {
-            if (!$featureService->canUse($feature, $amount)) {
+            if (! $featureService->canUse($feature, $amount)) {
                 return false;
             }
         }
@@ -118,6 +118,7 @@ trait CanUseIt
         foreach ($features as $feature) {
             if ($featureService->canUse($feature, $amount)) {
                 $canUse = true;
+
                 break;
             }
         }

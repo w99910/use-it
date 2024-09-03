@@ -11,15 +11,15 @@ class CanUseAnyFeatureMiddleware
     public function handle(Request $request, Closure $next, ...$features): Response
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return new Response('Please authenticate yourself.', 401);
         }
 
-        if (!method_exists($user, 'canUseAnyFeature')) {
+        if (! method_exists($user, 'canUseAnyFeature')) {
             return new Response('Please Add \ThomasBrillion\UseIt\Traits\CanUseIt Trait in your model', 404);
         }
 
-        if (!$user->canUseAnyFeature($features, $request->input('amount'))) {
+        if (! $user->canUseAnyFeature($features, $request->input('amount'))) {
             return new Response("Sorry. You are not allowed to proceed.", 403);
         }
 
