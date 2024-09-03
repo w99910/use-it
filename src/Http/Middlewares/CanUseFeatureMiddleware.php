@@ -4,7 +4,7 @@ namespace ThomasBrillion\UseIt\Http\Middlewares;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class CanUseFeatureMiddleware
 {
