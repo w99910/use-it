@@ -441,6 +441,6 @@ The MIT LICENSE.
 
 ## Funding
 
-Consider [buying me a coffee](https://buy.stripe.com/eVa4hXaHdc0t1Nu144) or informing me if you have any freelance projects or remote job opportunities available.
+Consider [supporting me](https://github.com/sponsors/w99910) or letting me know if you have any freelance projects or remote job opportunities available.
 
 Please consider supporting me to continue contribution of open-source libraries.
